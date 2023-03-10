@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <mysql.h>
 #include <stdlib.h>
+#include <string.h>
 
 MYSQL *conn;
 MYSQL_RES *res;
@@ -15,16 +16,18 @@ char** list_of_bus(char source_location[50], char destination_location[50]) {
 	// sprintf(str, "select * from route_details where from_location='%s' and to_location='%s'", source_location, destination_location);
 	sprintf(str,"SELECT bus_name FROM bus_details JOIN route_details ON bus_details.bus_id = route_details.bus_id WHERE route_details.from_location = '%s' AND route_details.to_location = '%s'", source_location, destination_location);
 
-	mysql_query(conn, str);
+	int ret = mysql_query(conn, str);
 	res = mysql_store_result(conn);   //stores the result of the query
+	// printf("%d %d\n",ret, res);
 	int num_fields = mysql_num_fields(res); //this returns total no of records in the table
-	char** bus_list = (char**) malloc(sizeof(char*) * num_fields); // create an array of 3 string pointers
-
+	char** bus_list = (char**) malloc(sizeof(char*) * num_fields); // create an array of num_field string pointers
+	int y=0;
+	// printf("%s",mysql_fetch_row(res)[2]);
 	while (row = mysql_fetch_row(res)) {
-		for (int i = 0; i < num_fields; ++i)
-		{
-			bus_list[i]=row[i];
-		}
+		// bus_list[y]=row[0]; //you can do it also with this method
+		// printf("a%sa",row[1]);
+		bus_list[y]=strdup(row[0]); //strdump send the array pointer of the value used while using malloc
+		y++;
 	}
 	mysql_free_result(res);
 	return bus_list;
@@ -42,11 +45,12 @@ void seat_availability() {
 	// printf("%s %s %s\n ",date,source_location,destination_location);
 
 	char** bus_list = list_of_bus(source_location, destination_location);; // call the function and get the string array pointer
+	int total_bus=sizeof(bus_list)/sizeof(bus_list[0]);
+	// printf("%d\n",total_bus );
 	printf("==================\n");
 	printf("Sl.No.    Bus Name\n");
 	printf("==================\n");
-
-    for (int i = 0; i < sizeof(bus_list)/sizeof(bus_list[0]); i++) {
+    for (int i = 0; i <= total_bus; i++) {
         printf("%d         %s \n",i+1, bus_list[i]);
     }
 
@@ -107,9 +111,9 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	// seat_availability();
+	seat_availability();
 	
-	add_bus();
+	// add_bus();
 
 	return 0;
 }
