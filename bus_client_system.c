@@ -101,10 +101,11 @@ int check_range_seat(int total_seats,char *token){
     }	
 	return 0;
 }
-int book_ticket(int bus_id,char date[11],int u_id){
+int book_ticket(int bus_id,char journey_date[11],int u_id){
 	/* this funcation will help to book the desired seat by the passenger */
-	// printf("%d %s %d\n",bus_id,date,u_id);
+	// printf("%d %s %d\n",bus_id,journey_date,u_id);
 	char seats[200]="20",str[200];
+	char today_date[11];
 	// printf("\n*Enter the seat not one space seperated if you want to book multiple seat. \n");
 	// printf("Enter the seat no : ");
 	// scanf("%[^\n]%*c",seats);
@@ -112,6 +113,11 @@ int book_ticket(int bus_id,char date[11],int u_id){
 	char *token = strtok(seats, " ");
 	char *token_copy = token;
 	char *token_copy2= token;
+
+    time_t t;
+    t = time(NULL);
+    struct tm tm = *localtime(&t);
+    sprintf(today_date,"%d-%d-%d", tm.tm_year+1900,tm.tm_mon+1,tm.tm_mday);
 
     // insert into booking_details (bus_id,journey_date,u_id,seat_no) values (1,'2023-03-08',1,5);
     sprintf(str,"select total_seats from bus_details where bus_id=%d",bus_id);
@@ -121,11 +127,11 @@ int book_ticket(int bus_id,char date[11],int u_id){
     // printf("%d",checked_status_already_booked);
     if (check_range_seat(total_seats,token_copy2)==0)
     {
-	    if (check_already_booked(bus_id,date,token_copy)==0)
+	    if (check_already_booked(bus_id,journey_date,token_copy)==0)
 	    {
 			while (token != NULL) {
 			    // printf("%s\n", token);
-			    sprintf(str,"insert into booking_details (bus_id,journey_date,u_id,seat_no) values (%d,'%s',%d,%s)",bus_id,date,u_id,token);
+			    sprintf(str,"insert into booking_details (bus_id,booking_date,journey_date,u_id,seat_no) values (%d,'%s','%s',%d,%s)",bus_id,today_date,journey_date,u_id,token);
 				mysql_query(conn, str);
 			    token = strtok(NULL, " ");
 			}	
@@ -342,11 +348,11 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	// seat_availability();
+	seat_availability();
 	
 	// add_bus();
 
-	manage_booking(1);
+	// manage_booking(1);
 
 	return 0;
 }
