@@ -36,6 +36,9 @@ char** list_of_bus(char source_location[50], char destination_location[50]) {
 	return bus_list;
 }
 int check_available_bus_or_not(int total_bus,char **bus_list){
+	/* This funcation helps us to find if there is any bus between two location or not
+		it will return 0 if theres will be not bus between station
+		else if there will be any bus between station then it will return 1 */
 	for (int i = 0; i <= total_bus; ++i)
 	{
 		if (strcmp(bus_list[1],"0")!=0) return 1;
@@ -68,7 +71,6 @@ void seat_availability() {
 	}
 	else printf("\n--- SORRY, THERE IS NO BUS FOR THIS LOCATION ---\n");
 	
-
 }
 // create trigger lowercase_from_location before insert on route_details for each row set new.from_location = new.from_location;
 int add_bus()
