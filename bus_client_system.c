@@ -20,19 +20,28 @@ char** list_of_bus(char source_location[50], char destination_location[50]) {
 	res = mysql_store_result(conn);   //stores the result of the query
 	// printf("%d %d\n",ret, res);
 	int num_fields = mysql_num_fields(res); //this returns total no of records in the table
+	// printf("%d total no of record\n",num_fields);
 	char** bus_list = (char**) malloc(sizeof(char*) * num_fields); // create an array of num_field string pointers
+	for (int i = 0; i < num_fields+1; ++i)
+	{
+		bus_list[i]="0";
+	}
 	int y=0;
 	// printf("%s",mysql_fetch_row(res)[2]);
 	while (row = mysql_fetch_row(res)) {
-		// bus_list[y]=row[0]; //you can do it also with this method
-		// printf("a%sa",row[1]);
 		bus_list[y]=strdup(row[0]); //strdump send the array pointer of the value used while using malloc
 		y++;
 	}
 	mysql_free_result(res);
 	return bus_list;
 }
-
+int check_available_bus_or_not(int total_bus,char **bus_list){
+	for (int i = 0; i <= total_bus; ++i)
+	{
+		if (strcmp(bus_list[1],"0")!=0) return 1;
+	}
+	return 0;
+}
 void seat_availability() {
 	/* This funcation will help to show the lists of all the vacant seats for a particular route */
 	char date[11] = "2023-03-08", source_location[50] = "Amritsar", destination_location[50] = "Jalandhar";
@@ -46,13 +55,19 @@ void seat_availability() {
 
 	char** bus_list = list_of_bus(source_location, destination_location);; // call the function and get the string array pointer
 	int total_bus=sizeof(bus_list)/sizeof(bus_list[0]);
-	// printf("%d\n",total_bus );
-	printf("==================\n");
-	printf("Sl.No.    Bus Name\n");
-	printf("==================\n");
-    for (int i = 0; i <= total_bus; i++) {
-        printf("%d         %s \n",i+1, bus_list[i]);
-    }
+	int is_bus_available = check_available_bus_or_not(total_bus,bus_list);
+	// printf("%d\n",is_bus_available);
+	if (is_bus_available!=0)
+	{
+		printf("==================\n");
+		printf("Sl.No.    Bus Name\n");
+		printf("==================\n");
+		for (int i = 0; i <= total_bus; i++) {
+		    printf("%d         %s \n",i+1, bus_list[i]);
+		}
+	}
+	else printf("\n--- SORRY, THERE IS NO BUS FOR THIS LOCATION ---\n");
+	
 
 }
 // create trigger lowercase_from_location before insert on route_details for each row set new.from_location = new.from_location;
