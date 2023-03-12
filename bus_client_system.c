@@ -60,16 +60,83 @@ int show_availability_chart(int total_bus,char ** bus_list){
 		return selected_bus_code;
 	}
 }
-int check_existance_in_array(int num,int arr[]){
-	for (int i = 0; i <= sizeof(arr); ++i)
+int check_existance_in_array(int num,int arr[],int total_seats){
+	/* This funcation will check if a number is present in the array or not
+	if number will be in the array then it will return 1
+	else it will return 0 */
+	for (int i = 0; i <= total_seats; ++i)
 	{
-		if (arr[i]==num)
-		{
-			return 1;
-		}
+		if (arr[i]==num) return 1;
 	}
 	return 0;
 }
+int check_already_booked(int bus_id,char date[],char *token){
+	/* this function will check if all the seats selected by the user is vacant or not
+	if all the seats are not vacant then it will return 1
+	else it will return 0*/
+	char str[200];
+	// sprintf(str,"select count(booking_id) from booking_details where bus_id=%d and booking_date='%s' and seat_no=%s and cancel_status=0",bus_id,date,token);
+    while (token != NULL) {
+    sprintf(str,"select count(booking_id) from booking_details where bus_id=%d and booking_date='%s' and seat_no=%s and cancel_status=0",bus_id,date,token);
+	mysql_query(conn, str);
+	res=mysql_store_result(conn);
+	if (atoi(mysql_fetch_row(res)[0])!=0)
+	{
+		return 1;
+	}
+    token = strtok(NULL, " ");
+	}	
+	return 0;
+}
+int check_range_seat(int total_seats,char *token){
+	/* this function will check if all the seats nunmber given by user to book is in the
+	 range of the total seat in the bus or no
+	 if there will be any one seat which is not in range it will return 1
+	 else it will return 0 */
+    while (token != NULL) {
+        // printf("%s\n", token);
+        if (atoi(token)>total_seats) return 1;
+        token = strtok(NULL, " ");
+    }	
+	return 0;
+}
+int book_ticket(int bus_id,char date[11],int u_id){
+	/* this funcation will help to book the desired seat by the passenger */
+	// printf("%d %s %d\n",bus_id,date,u_id);
+	char seats[200]="20",str[200];
+	// printf("\n*Enter the seat not one space seperated if you want to book multiple seat. \n");
+	// printf("Enter the seat no : ");
+	// scanf("%[^\n]%*c",seats);
+	// printf("%s",seats);
+	char *token = strtok(seats, " ");
+	char *token_copy = token;
+	char *token_copy2= token;
+
+    // insert into booking_details (bus_id,booking_date,u_id,seat_no) values (1,'2023-03-08',1,5);
+    sprintf(str,"select total_seats from bus_details where bus_id=%d",bus_id);
+    mysql_query(conn, str);
+	res=mysql_store_result(conn);
+	int total_seats=atoi(mysql_fetch_row(res)[0]);
+    // printf("%d",checked_status_already_booked);
+    int checked_seat_range=check_range_seat(total_seats,token_copy2);
+    int checked_status_already_booked=check_already_booked(bus_id,date,token_copy);
+    if (checked_seat_range==0)
+    {
+	    if (checked_status_already_booked==0)
+	    {
+			while (token != NULL) {
+			    // printf("%s\n", token);
+			    sprintf(str,"insert into booking_details (bus_id,booking_date,u_id,seat_no) values (%d,'%s',%d,%s)",bus_id,date,u_id,token);
+				mysql_query(conn, str);
+			    token = strtok(NULL, " ");
+			}	
+			printf("\n--- Congratulation! Your seats has been booked ---");
+	    }
+	    else printf("\n--- Sorry! Your selected seat are already booked ---\n");
+	}
+	else printf("\n--- Sorry! Please enter the correct Seat number ---\n");
+}
+
 void seat_availability() {
 	/* This funcation will help to show the lists of all the vacant seats for a particular route */
 	char date[11] = "2023-03-08", source_location[50] = "Amritsar", destination_location[50] = "Jalandhar";
@@ -88,6 +155,8 @@ void seat_availability() {
 	int total_bus=sizeof(bus_list)/sizeof(bus_list[0]);
 	int total_available_bus = check_available_bus_or_not(total_bus,bus_list);
 	int i=0;
+	char status[8];	
+	char command;
 	// printf("%d\n",total_available_bus);
 
 	if (total_available_bus!=0)
@@ -109,9 +178,6 @@ void seat_availability() {
 		sprintf(str,"select rating,total_seats from bus_details where bus_id=%d",main_bus_code);
 		mysql_query(conn,str);
 		res=mysql_store_result(conn);
-		// rating=atoi(mysql_fetch_row(res)[0]);
-		// total_seats=atoi(mysql_fetch_row(res)[1]);
-		
 		while(row=mysql_fetch_row(res)){
 			rating=atof(row[0]);
 			total_seats=atoi(row[1]);
@@ -123,12 +189,9 @@ void seat_availability() {
 		// printf("%d is the total not of seats\n",total_seats);
 
 		//select seat_no from booking_details where bus_id=1 and  booking_date='2023-03-08' and cancel_status=0;
-		// insert into booking_details (bus_id,booking_date,u_id,seat_no) values (1,'2023-03-08',1,5);
 		sprintf(str,"select seat_no from booking_details where bus_id=%d and  booking_date='%s' and cancel_status=0",main_bus_code,date);
-		// printf("%s\n",str);
 		mysql_query(conn,str);
 		res=mysql_store_result(conn);
-		printf("\n%d total seats\n",total_seats);
 		int booked_seat_array[total_seats];
 		for (int i = 0; i <= total_seats; ++i)
 		{
@@ -142,21 +205,30 @@ void seat_availability() {
 		mysql_free_result(res);
 		
 		printf("\e[1;1H\e[2J");    //this will clear the terminal screen
-		printf("\nSource Location: %s           Destination Location: %s             Date: %s\n",source_location,destination_location,date);
-		printf("\nBus Name: %s                  Rating: %0.1f\n",bus_list[selected_bus_code-1],rating);	
+		printf("\n Source Location: %s           Destination Location: %s             Date: %s\n",source_location,destination_location,date);
+		printf("\n Bus Name: %s                  Rating: %0.1f\n",bus_list[selected_bus_code-1],rating);	
 		printf("==================================================================================================\n");
 		printf("                                       SEAT AVAILABILITY DATA                                     \n");
 		printf("==================================================================================================\n");
 		printf("\n");
-		char status[8];
+
 		// int arr[7]={1,4,17,6,19,5,13};
 		for (int i = 1; i <=total_seats ; ++i)
 		{
 			printf("      [%d] ",i);
 			(i<10)?printf(" "):printf("");
-			(check_existance_in_array(i,booked_seat_array))?printf(" Booked  "):printf("         ");
+			(check_existance_in_array(i,booked_seat_array,total_seats))?printf(" Booked  "):printf("         ");
 			if (i%5==0)	printf("\n\n");
 		}
+		// printf("\n Do you want to book the seat (Yes/No)? ");
+		// scanf("%c",&command);
+		command='y'; //setting default value for command to book ticket or not
+		if ((int)command==89 || (int)command==121)
+		{
+			book_ticket(main_bus_code,date,1);
+		}
+
+
 	}
 	else printf("\n--- SORRY, THERE IS NO BUS FOR THIS LOCATION ---\n");
 	
