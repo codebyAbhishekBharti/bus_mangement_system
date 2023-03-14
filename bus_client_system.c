@@ -8,6 +8,8 @@ MYSQL *conn;
 MYSQL_RES *res;
 MYSQL_ROW row;
 
+char* return_today_date();
+
 char** list_of_bus(char source_location[50], char destination_location[50]) {
 	/* This funcation returns the list of bus going in following roots ie. between source location and destination_location */
 	char str[200];
@@ -101,11 +103,12 @@ int check_range_seat(int total_seats,char *token){
     }	
 	return 0;
 }
-int book_ticket(int bus_id,char journey_date[11],int u_id){
+int book_ticket(int bus_id,char journey_date[11],int u_id,int route_id){
 	/* this funcation will help to book the desired seat by the passenger */
+	char payment_choice;
 	// printf("%d %s %d\n",bus_id,journey_date,u_id);
-	char seats[200]="20",str[200];
-	char today_date[11];
+	char seats[200]="13",str[200];
+	int total_seat_to_book=0;
 	// printf("\n*Enter the seat not one space seperated if you want to book multiple seat. \n");
 	// printf("Enter the seat no : ");
 	// scanf("%[^\n]%*c",seats);
@@ -113,11 +116,17 @@ int book_ticket(int bus_id,char journey_date[11],int u_id){
 	char *token = strtok(seats, " ");
 	char *token_copy = token;
 	char *token_copy2= token;
+	char *token_copy3= token;
 
-    time_t t;
-    t = time(NULL);
-    struct tm tm = *localtime(&t);
-    sprintf(today_date,"%d-%d-%d", tm.tm_year+1900,tm.tm_mon+1,tm.tm_mday);
+	char * today_date=return_today_date(); 
+
+	while (token_copy3 != NULL) {  
+		//this will count total no of seats to book and store the data in total_seat_to_to_book variable
+	    total_seat_to_book++;
+	    token_copy3 = strtok(NULL, " ");
+	}
+
+	// printf("%d total no seats to book",total_seat_to_book);
 
     // insert into booking_details (bus_id,journey_date,u_id,seat_no) values (1,'2023-03-08',1,5);
     sprintf(str,"select total_seats from bus_details where bus_id=%d",bus_id);
@@ -131,18 +140,34 @@ int book_ticket(int bus_id,char journey_date[11],int u_id){
 	    {
 			while (token != NULL) {
 			    // printf("%s\n", token);
-			    sprintf(str,"insert into booking_details (bus_id,booking_date,journey_date,u_id,seat_no) values (%d,'%s','%s',%d,%s)",bus_id,today_date,journey_date,u_id,token);
-				mysql_query(conn, str);
+				// select fare from route_details where bus_id=2 and from_location='Amritsar' and to_location='Jalandhar';
+			    sprintf(str,"select fare from route_details where route_id=%d",route_id);
+			    mysql_query(conn,str);
+			    res=mysql_store_result(conn);
+			    float price_per_seat=atoi(mysql_fetch_row(res)[0]);
+			    // printf("%0.1f",price_per_seat);
+			    printf("--------------------------------------------------------------------------------------------------\n");
+			    printf("       TOTAL FARE CHARGE : %0.2f\n",price_per_seat*total_seat_to_book);
+			    printf("--------------------------------------------------------------------------------------------------\n");
+			    printf("\nPress 'y' to pay the amount: ");
+			    scanf("%c",&payment_choice);
+			    if (payment_choice=='y')
+			    {
+				    sprintf(str,"insert into booking_details (bus_id,booking_date,journey_date,u_id,seat_no) values (%d,'%s','%s',%d,%s)",bus_id,today_date,journey_date,u_id,token);
+					mysql_query(conn, str);
+					printf("\n--- Congratulation! Your seats has been booked ---");
+			    }
+			    else printf("\n---- Payment Failed !!!! ----\nSorry! Unable to book ticket.... \n");
+
 			    token = strtok(NULL, " ");
 			}	
-			printf("\n--- Congratulation! Your seats has been booked ---");
 	    }
 	    else printf("\n--- Sorry! Your selected seat are already booked ---\n");
 	}
 	else printf("\n--- Sorry! Please enter the correct Seat number ---\n");
 }
 
-void seat_availability() {
+void seat_availability(int u_id) {
 	/* This funcation will help to show the lists of all the vacant seats for a particular route */
 	char date[11] = "2023-03-08", source_location[50] = "Amritsar", destination_location[50] = "Jalandhar";
 	int selected_bus_code,main_bus_code,total_seats;
@@ -230,7 +255,13 @@ void seat_availability() {
 		command='y'; //setting default value for command to book ticket or not
 		if ((int)command==89 || (int)command==121)
 		{
-			book_ticket(main_bus_code,date,1);
+			sprintf(str,"select route_id from route_details where bus_id=%d and from_location='%s' and to_location='%s'",main_bus_code,source_location,destination_location);
+			// printf("%s",str);
+			mysql_query(conn,str);
+			res=mysql_store_result(conn);
+			int route_id = atoi(mysql_fetch_row(res)[0]);
+			// printf("%d\n", route_id);
+			book_ticket(main_bus_code,date,u_id,route_id);
 		}
 
 
@@ -293,13 +324,9 @@ void mysql_booking_data_printer(char str[300]){
 void manage_booking(int u_id){
 	/* this funcation will show the user their complted upcoming and canceld ticket */
 	int choice=1;
-	char date[11],str[300];
-
-    time_t t;
-    t = time(NULL);
-    struct tm tm = *localtime(&t);
-    sprintf(date,"%d-%d-%d", tm.tm_year+1900,tm.tm_mon+1,tm.tm_mday); //this will save the date in the date variable
-    printf("%s\n",date);
+	char str[300];
+    char * today_date=return_today_date();
+    // printf("%s\n",today_date);
 	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
 	printf("==================================================================================================\n");
 	printf("                                          MANAGE ACCOUNT                                          \n");
@@ -317,12 +344,12 @@ void manage_booking(int u_id){
 // -13';
 	if (choice==1) 
 	{
-		sprintf(str,"SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date > '%s'",u_id,date);
+		sprintf(str,"SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date > '%s'",u_id,today_date);
 		mysql_booking_data_printer(str);
 	}
 	else if (choice==2) 
 	{
-		sprintf(str,"SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date < '%s'",u_id,date);
+		sprintf(str,"SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date < '%s'",u_id,today_date);
 		mysql_booking_data_printer(str);
 	}
 	else if (choice==3) 
@@ -331,6 +358,34 @@ void manage_booking(int u_id){
 		mysql_booking_data_printer(str);
 	}
 	else printf("Please enter the right value !!!");
+}
+
+char* return_today_date() {
+    char *date = malloc(11 * sizeof(char)); // Allocate memory for string;
+    time_t t;
+    t = time(NULL);
+    struct tm tm = *localtime(&t);
+    sprintf(date,"%d-%d-%d", tm.tm_year+1900,tm.tm_mon+1,tm.tm_mday);
+    return date; // Return pointer to string
+}
+
+void cancel_seat(int u_id){
+	char str[300];
+	int i=1;
+	char * today_date=return_today_date();
+	printf("%s",today_date);
+	sprintf(str,"SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date > '%s'",u_id,today_date);
+	mysql_query(conn, str);
+	// printf("%s\n",str );
+	res = mysql_store_result(conn);   //stores the result of the query
+	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+	printf("--------------------------------------------------------------------------------------------------\n");
+	printf("Sl No    BUS NUMBER     BUS NAME       SOURCE         DESTINATION       SEAT NUMBER       DATE    \n");
+	printf("--------------------------------------------------------------------------------------------------\n");
+	while (row=mysql_fetch_row(res)){
+		printf(" %-7d %-14s %-14s %-14s %-17s %-14s %-10s\n",i,row[0],row[1],row[2],row[3],row[4],row[5],row[6]);
+		i++;
+	}
 }
 int main(int argc, char const *argv[])
 {
@@ -348,11 +403,13 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	seat_availability();
+	seat_availability(1);
 	
 	// add_bus();
 
 	// manage_booking(1);
+
+	// cancel_seat(1);
 
 	return 0;
 }
