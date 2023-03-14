@@ -9,7 +9,7 @@ MYSQL_RES *res;
 MYSQL_ROW row;
 
 char* return_today_date();
-
+int check_existance_in_array(int num,int arr[],int t_array_value);
 char** list_of_bus(char source_location[50], char destination_location[50]) {
 	/* This funcation returns the list of bus going in following roots ie. between source location and destination_location */
 	char str[200];
@@ -63,11 +63,11 @@ int show_availability_chart(int total_bus,char ** bus_list){
 		return selected_bus_code;
 	}
 }
-int check_existance_in_array(int num,int arr[],int total_seats){
+int check_existance_in_array(int num,int arr[],int t_array_value){
 	/* This funcation will check if a number is present in the array or not
 	if number will be in the array then it will return 1
 	else it will return 0 */
-	for (int i = 0; i <= total_seats; ++i)
+	for (int i = 0; i <= t_array_value; ++i)
 	{
 		if (arr[i]==num) return 1;
 	}
@@ -371,20 +371,58 @@ char* return_today_date() {
 
 void cancel_seat(int u_id){
 	char str[300];
-	int i=1;
+	int i=0;
 	char * today_date=return_today_date();
-	printf("%s",today_date);
-	sprintf(str,"SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date > '%s'",u_id,today_date);
+	int default_size=1;
+	int cancel_seat_no;
+	char cancel_surity;
+	int* booking_id_array = (int*) malloc(default_size * sizeof(default_size)); // Allocate initial memory for array
+	// printf("%s",today_date);
+	sprintf(str,"SELECT bk.booking_id,bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date > '%s' and bk.cancel_status=0",u_id,today_date);
 	mysql_query(conn, str);
-	// printf("%s\n",str );
+	printf("%s\n",str );
 	res = mysql_store_result(conn);   //stores the result of the query
 	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
 	printf("--------------------------------------------------------------------------------------------------\n");
 	printf("Sl No    BUS NUMBER     BUS NAME       SOURCE         DESTINATION       SEAT NUMBER       DATE    \n");
 	printf("--------------------------------------------------------------------------------------------------\n");
 	while (row=mysql_fetch_row(res)){
-		printf(" %-7d %-14s %-14s %-14s %-17s %-14s %-10s\n",i,row[0],row[1],row[2],row[3],row[4],row[5],row[6]);
+		booking_id_array[i]=atoi(row[0]);
+		// printf("%d\n", booking_id_array[i]);
+		booking_id_array = (int*) realloc(booking_id_array, (i+1) * sizeof(int)); // Reallocate memory with new size
+		printf(" %-7d %-14s %-14s %-14s %-17s %-14s %-10s\n",i+1,row[1],row[2],row[3],row[4],row[5],row[6],row[7]);
 		i++;
+	}
+
+	while (1){
+		printf("\nEnter the 'Sl No' to cancel the seat: ");
+		// scanf("%d",&cancel_seat_no);
+		if (scanf("%d",&cancel_seat_no)==1)
+		{
+			if (cancel_seat_no<=i && cancel_seat_no>0)
+			{
+				printf("\nAre you sure you want to cancel the seat: ");
+				getchar(); // consume newline character
+				scanf("%c",&cancel_surity);
+				printf("%c\n",cancel_surity );
+				if (cancel_surity=='y')
+				{
+					// printf("%d\n",booking_id_array[cancel_seat_no-1] );
+					sprintf(str,"update booking_details set cancel_status=1 where booking_id=%d",booking_id_array[cancel_seat_no-1]);
+					printf("%s\n",str);
+					mysql_query(conn,str);
+					printf("---- Ticket Cancelled Successfully !!!! ----\n");
+					break;
+				}
+				else printf("Aborted Ticket Cancellation !!!!\n");		
+				break;
+			}
+			else{
+				printf("\n---- Enter the correct 'Sl No' !!!!! ----\n");
+			}
+		}
+		else printf("Please enter right value !!!!!!\n");
+
 	}
 }
 int main(int argc, char const *argv[])
@@ -403,13 +441,13 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	seat_availability(1);
+	// seat_availability(1);
 	
 	// add_bus();
 
 	// manage_booking(1);
 
-	// cancel_seat(1);
+	cancel_seat(1);
 
 	return 0;
 }
