@@ -397,12 +397,12 @@ void cancel_seat(int u_id){
 	while (1){
 		printf("\nEnter the 'Sl No' to cancel the seat: ");
 		// scanf("%d",&cancel_seat_no);
-		if (scanf("%d\n",&cancel_seat_no)==1)
+		if (scanf("%d",&cancel_seat_no)==1)
 		{
 			if (cancel_seat_no<=i && cancel_seat_no>0)
 			{
 				printf("\nAre you sure you want to cancel the seat: ");
-				// getchar(); // consume newline character
+				getchar(); // consume newline character
 				scanf("%c",&cancel_surity);
 				printf("%c\n",cancel_surity );
 				if (cancel_surity=='y')
