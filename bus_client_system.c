@@ -426,6 +426,30 @@ void cancel_seat(int u_id){
 
 	}
 }
+
+int login(char username[],char password[]){
+	/* This funcation will return the user if login is sussessfull else it will return 0*/
+	char str[200]; //this variable will store the mysql command to be executed
+	int status; //will store status of login
+	int u_id=0; //will store the user id of user if successful login else 0
+
+	sprintf(str,"select count(*) ,u_id from users where name='%s' and password='%s'",username,password);  //store the mysql query to str variable
+	mysql_query(conn,str);  //running sql query
+	res = mysql_store_result(conn);   //stores the result of the query
+	row=mysql_fetch_row(res); //fetches the row of the mysql data 
+	status=atoi(row[0]); //storing user login status
+	// printf("%d\n", status);
+	if (status==1) //if status is 1 means users data is correct 
+	{
+		u_id=atoi(row[1]); //storing user id
+		return u_id; //returing userid of the user
+	}
+	else{
+		return 0; //returing default value if the users data is incorrect
+	}
+
+}
+
 int main(int argc, char const *argv[])
 {
 	conn = mysql_init(NULL);
@@ -442,13 +466,16 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
+	int status = login("Prince","prince");   //sending userid or password to login function to get user id if successful login or 0
+	printf("%d\n", status);
+
 	// seat_availability(1);
 	
 	// add_bus();
 
 	// manage_booking(1);
 
-	cancel_seat(1);
+	// cancel_seat(1);
 
 	return 0;
 }
