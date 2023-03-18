@@ -463,6 +463,62 @@ int login(char username[],char password[]){
 
 }
 
+int signup(){
+	/* this function will will the user to sign up 
+	data will be stored in users table of the database */
+	char str[200]; //stores the mysql command to execute
+	char name[100]="Subhadeep Kumar",user_name[50]="Abhishek",email[50]="subhadeep@gmail.com",password[250]="subhadeep";  //initiating different variable to store the data in databse
+	int age=18,mob=1234567890;
+	while(1){
+		//storing the data in variables
+		//check variable will store the data if correct data is inverted in variable or not
+		printf("\nEnter your name:                    ");
+		int check1 = scanf("%[^\n]%*c",&name);
+		printf("Enter username you want to create:  ");
+		int check2 = scanf("%[^\n]%*c",&user_name);
+		printf("Enter email address:                ");
+		int check3 = scanf("%[^\n]%*c",&email);
+		printf("Enter password:                     ");
+		int check4 = scanf("%[^\n]%*c",&password);
+		printf("Enter your age:                     ");
+		int check5 = scanf("%d",&age);
+		printf("Enter mobile number:                ");
+		int check6 = scanf("%d",&mob);
+
+		if (check1==1&&check2==1&&check3==1&&check4==1&&check5==1&&check6==1) //check if all the inputs are correct or not 
+			break;
+		else{
+			printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+			printf("Please enter valid data !!!!\n");
+			while (getchar() != '\n'); // clear input buffer
+			continue;
+		}
+	}
+	while (getchar() != '\n'); // clear input buffer
+    while(1){  
+    	//running while loop to check the user name is valid or not if not valid then it will retake the input from user
+        sprintf(str, "SELECT COUNT(user_name) FROM users WHERE user_name='%s'", user_name); //stores the query in str variable to execute in mysql
+        mysql_query(conn, str); //executes the mysql command
+        int check_availability_of_id = atoi(mysql_fetch_row(mysql_store_result(conn))[0]); //stores the count of total no of id which has the same user name provided by the user
+        if (check_availability_of_id > 0) { 
+        	//if check availability > 0 then there is duplicacy of user name so retake the input
+            printf("\nThat username is already taken !!!!!\n");
+            printf("Enter different user name:        ");
+	        if (scanf("%49[^\n]%*c", &user_name) != 1) { //checking for valid input
+	        	while (getchar() != '\n'); // clear input buffer
+	            printf("\nInvalid input. Please try again.\n");
+	            continue; //jump to next iteration to check if the new user name is valid or not
+	        }   
+        }
+        else break;
+	}
+	sprintf(str,"insert into users (name,user_name,age,email,mob,password) values ('%s','%s',%d,'%s',%d,'%s')",name,user_name,age,email,mob,password);  //storing sql command to create new user
+	// printf("%s\n", str);
+	mysql_query(conn,str); //executes mysql query
+	printf("\n\n----- Account has been Successfully created !!!!! -----\n");
+	return 0;
+}
+
 int main(int argc, char const *argv[])
 {
 	conn = mysql_init(NULL);
@@ -481,12 +537,13 @@ int main(int argc, char const *argv[])
 
 	int uid_status = login("Abhishek","abhishek");   //sending userid or password to login function to get user id if successful login or 0
 	// printf("%d\n", uid_status);
+	signup(); //started signup module if the user wants to register into the software
 
 	// seat_availability(uid_status);
 	
 	// add_bus();
 
-	manage_booking(uid_status);
+	// manage_booking(uid_status);
 
 	// cancel_seat(uid_status);
 
