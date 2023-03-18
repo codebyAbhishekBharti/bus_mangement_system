@@ -322,42 +322,54 @@ void mysql_booking_data_printer(char str[300]){
 	}
 }
 void manage_booking(int u_id){
-	/* this funcation will show the user their complted upcoming and canceld ticket */
-	int choice=1;
-	char str[300];
-    char * today_date=return_today_date();
+	/* this funcation will show the user their complted ,upcoming and canceld ticket */
+	int choice=1; //stores the choice of user to display according 
+	char str[300];  //stores mysql command to execute
+    char * today_date=return_today_date(); //stores todays date
     // printf("%s\n",today_date);
 	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
-	printf("==================================================================================================\n");
-	printf("                                          MANAGE ACCOUNT                                          \n");
-	printf("==================================================================================================\n");
-	printf("\nEnter number to show details: \n");
-	printf("1. Upcomig Journey\n");
-	printf("2. Completed Journey\n");
-	printf("3. Canceled Journey\n");
-	printf("\nEnter your choice: ");
-	scanf("%d",&choice);
-	// printf("u_id %d",u_id);
-
-// 	SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id =
-//  rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=1 and bk.journey_date > '2023-3
-// -13';
-	if (choice==1) 
-	{
-		sprintf(str,"SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date > '%s'",u_id,today_date);
-		mysql_booking_data_printer(str);
+	while(1){ //starting while loop so to handle if the user has entered unexpected data 
+		printf("==================================================================================================\n");
+		printf("                                          MANAGE ACCOUNT                                          \n");
+		printf("==================================================================================================\n");
+		printf("\nEnter number to show details: \n");
+		printf("1. Upcomig Journey\n");
+		printf("2. Completed Journey\n");
+		printf("3. Canceled Journey\n");
+		printf("99. To exit program\n");
+		printf("\nEnter your choice: ");
+		// scanf("%d",&choice);
+		if (scanf("%d",&choice)==1)
+		{
+			switch (choice){ //started switch cased based on data by user to print mysql info on screen
+			case 1:
+				// this will store the sql comand for fetching the data of upcoming journey
+				sprintf(str,"SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date > '%s'",u_id,today_date);
+				break;
+			case 2:
+				// this will store the sql comand for fetching the data of completed journey
+				sprintf(str,"SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date < '%s'",u_id,today_date);
+				break;
+			case 3:
+				// this will store the sql comand for fetching the data of canceled ticket
+				sprintf(str,"SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.cancel_status=1",u_id);
+				break;
+			case 99:
+				break;
+			default:
+				printf("Input out of range !!!!\n");  //this will print on screen if user has entered greater than 3 or other than 99
+			}
+			if (str[0]!='\0')
+			{
+				mysql_booking_data_printer(str); //this will print the data on the screen returned by mysql
+			}
+			break;  //getting out of while loop
+		}
+		else{
+			printf("Please enter the right value !!!\n");   //this will print if the user has entered anything other than integer in input
+			while (getchar() != '\n'); // clear input buffer
+		}
 	}
-	else if (choice==2) 
-	{
-		sprintf(str,"SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date < '%s'",u_id,today_date);
-		mysql_booking_data_printer(str);
-	}
-	else if (choice==3) 
-	{
-		sprintf(str,"SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.cancel_status=1",u_id);
-		mysql_booking_data_printer(str);
-	}
-	else printf("Please enter the right value !!!");
 }
 
 char* return_today_date() {
@@ -433,7 +445,8 @@ int login(char username[],char password[]){
 	int status; //will store status of login
 	int u_id=0; //will store the user id of user if successful login else 0
 
-	sprintf(str,"select count(*) ,u_id from users where name='%s' and password='%s'",username,password);  //store the mysql query to str variable
+	sprintf(str,"select count(*) ,u_id from users where user_name='%s' and password='%s'",username,password);  //store the mysql query to str variable
+	// printf("%s\n",str );
 	mysql_query(conn,str);  //running sql query
 	res = mysql_store_result(conn);   //stores the result of the query
 	row=mysql_fetch_row(res); //fetches the row of the mysql data 
@@ -466,16 +479,16 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	int status = login("Prince","prince");   //sending userid or password to login function to get user id if successful login or 0
-	printf("%d\n", status);
+	int uid_status = login("Abhishek","abhishek");   //sending userid or password to login function to get user id if successful login or 0
+	// printf("%d\n", uid_status);
 
-	// seat_availability(1);
+	// seat_availability(uid_status);
 	
 	// add_bus();
 
-	// manage_booking(1);
+	manage_booking(uid_status);
 
-	// cancel_seat(1);
+	// cancel_seat(uid_status);
 
 	return 0;
 }
