@@ -169,7 +169,7 @@ int book_ticket(int bus_id,char journey_date[11],int u_id,int route_id){
 
 void seat_availability(int u_id) {
 	/* This funcation will help to show the lists of all the vacant seats for a particular route */
-	char date[11] = "2023-03-08", source_location[50] = "Amritsar", destination_location[50] = "Jalandhar";
+	char date[11] = "08-03-2023", source_location[50] = "Amritsar", destination_location[50] = "Jalandhar";
 	int selected_bus_code,main_bus_code,total_seats;
 	float rating;
 	char str[200];
@@ -217,9 +217,10 @@ void seat_availability(int u_id) {
 		// printf("%d is the main bus code\n",main_bus_code);
 		// printf("%f is teh rating of that bus\n",rating);
 		// printf("%d is the total not of seats\n",total_seats);
+// INSERT INTO my_table (id, date_col) VALUES (1, STR_TO_DATE('03-19-2023', '%m-%d-%Y'));
 
 		//select seat_no from booking_details where bus_id=1 and  journey_date='2023-03-08' and cancel_status=0;
-		sprintf(str,"select seat_no from booking_details where bus_id=%d and  journey_date='%s' and cancel_status=0",main_bus_code,date);
+		sprintf(str,"select seat_no from booking_details where bus_id=%d and  journey_date=STR_TO_DATE('%s', '%%d-%%m-%%Y') and cancel_status=0",main_bus_code,date);
 		mysql_query(conn,str);
 		res=mysql_store_result(conn);
 		int booked_seat_array[total_seats];
@@ -278,26 +279,26 @@ int add_bus()
 	int total_seats=20;
 
 	printf("\n============  ENTER THE DETAILS TO ADD BUS  ============\n\n");
-	printf("Enter bus name:                ");
+	printf("Enter bus name:                     ");
 	scanf("%[^\n]%*c",&bus_name);
-	printf("Souce location of bus:         ");
+	printf("Souce location of bus:              ");
 	scanf("%[^\n]%*c",&from_location);
-	printf("Destination location of bus:   ");
+	printf("Destination location of bus:        ");
 	scanf("%[^\n]%*c",&to_location);
-	printf("Departure time of bus:         ");
+	printf("Departure time of bus:              ");
 	scanf("%[^\n]%*c",&departure_time);
-	printf("Arrival time of bus:           ");
+	printf("Arrival time of bus:                ");
 	scanf("%[^\n]%*c",&arrival_time);
-	printf("Rating of bus:                 ");
+	printf("Rating of bus(?/5):                 ");
 	scanf("%f",&rating);
-	printf("Fare of bus:                   ");
+	printf("Fare of bus:                        ");
 	scanf("%f",&fare);
-	printf("Total seats in bus:            ");
+	printf("Total seats in bus:                 ");
 	scanf("%d",&total_seats);
 
 	sprintf(str,"insert into bus_details (bus_name,rating,total_seats) values ('%s',%0.1f,%d)",bus_name,rating,total_seats);
 	int check_query = mysql_query(conn, str);
-	printf("Check query data %d",check_query);
+	// printf("Check query data %d",check_query);
 	sprintf(str,"select bus_id from bus_details where bus_name='%s'",bus_name);
 	mysql_query(conn, str);
 	res = mysql_store_result(conn);   //stores the result of the query
@@ -305,7 +306,7 @@ int add_bus()
 	// printf("%d\n",bus_id);
 	sprintf(str,"insert into route_details (bus_id,from_location,to_location,departure_time,arrival_time,fare) values (%d,'%s','%s','%s','%s',%0.1f)",bus_id,from_location,to_location,departure_time,arrival_time,fare);
 	mysql_query(conn, str);
-	printf("BUS DETAILS HAS BEEN SUCESSFULLY ADDED");
+	printf("\nBUS DETAILS HAS BEEN SUCESSFULLY ADDED\n");
 	return 0;
 }
 void mysql_booking_data_printer(char str[300]){
@@ -537,9 +538,9 @@ int main(int argc, char const *argv[])
 
 	int uid_status = login("Abhishek","abhishek");   //sending userid or password to login function to get user id if successful login or 0
 	// printf("%d\n", uid_status);
-	signup(); //started signup module if the user wants to register into the software
+	// signup(); //started signup module if the user wants to register into the software
 
-	// seat_availability(uid_status);
+	seat_availability(uid_status);
 	
 	// add_bus();
 
@@ -547,5 +548,7 @@ int main(int argc, char const *argv[])
 
 	// cancel_seat(uid_status);
 
+
+	
 	return 0;
 }
