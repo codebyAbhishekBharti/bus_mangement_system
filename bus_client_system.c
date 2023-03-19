@@ -520,6 +520,114 @@ int signup(){
 	return 0;
 }
 
+int change_bus_details(int u_id){
+	/* this function is responsible for change the details of bus, route details or deleting a bus*/
+	float fare; //stores fare of the bus in a particular route
+	int seats; //stores total no of seats in a particular bus
+	char departure_time[9],arrival_time[9]; //stores data about departure and arrival timing of the bus
+	char from_location[50],to_location[50]; //stores data about the source and destination location of the bus route
+	int choice; //stores data about what variable details you user want to change
+	char query[200]; //stores mysql query to be executed
+	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+	printf("==================================================================================================\n");
+	printf("                                         CHANGE BUS DETAILS                                       \n");
+	printf("==================================================================================================\n");
+	while(1){
+		printf("\nSelect the option to change details: \n");
+		printf("1. Change bus fare\n");
+		printf("2. Change total bus seats\n");
+		printf("3. Change arrival/departure location\n");
+		printf("4. Change source/destination location\n");
+		printf("5. Delete bus\n");
+		printf("99. Go back\n");
+		printf("Enter your choice here: ");
+		if (scanf("%d",&choice)==1)
+		{
+			switch(choice){
+			case 1:
+				int i=0; //serial no. iteration for printing details of bus
+				char surety; //stores data if the user is sure to change the fare of the bus
+				int default_size=1; //default size of array
+				int* route_id_array = (int*) malloc(default_size * sizeof(default_size)); // Allocate initial memory for array
+				//below line stores the sql command to fetch bus name, from location, to location and fare of bus where bus owner is user
+				sprintf(query,"select bd.bus_name,rd.from_location,rd.to_location,rd.fare,rd.route_id from bus_details bd join route_details rd on bd.bus_id = rd.bus_id where bd.owner_id=%d",u_id);
+				printf("%s\n",query);
+				mysql_query(conn,query); //running sql query
+				res=mysql_store_result(conn); //storing sql result
+				printf("--------------------------------------------------------------------------------------------------\n");
+				printf("Sl. No.      Bus Name         Source Location        Destination Location         Fare            \n");
+				printf("--------------------------------------------------------------------------------------------------\n");
+				while(row=mysql_fetch_row(res)){ //iterating through all the row present in the result of mysql
+					route_id_array[i]=atoi(row[4]);  //storing route id of bus in an array
+					route_id_array = (int*) realloc(route_id_array, (i +1) * sizeof(int)); // Reallocate memory with new size
+					printf("%-12d %-16s %-22s %-28s %s\n",i+1,row[0],row[1],row[2],row[3],row[4]);  //printing sql data
+					i++;
+				}
+				
+				while (1){ //starting loop for handling wrong inputs
+					printf("\nEnter the Serial Number of bus whose fare charge you want to change: ");
+					if (scanf("%d",&choice)==1 && (choice<=i || choice==99)) //condition to check for valid input
+					{
+						if (choice==99)  //termination condition
+						{
+							printf("Transaction Canceled fare not changed !!!!!");
+							break;  //getting out of while loop without changeing fare
+						}
+						while (1){  //starting loop to handle wrong inputs
+							printf("\nEnter the new fare price: ");
+							if (scanf("%f",&fare)==1)
+							{
+								printf("\n\n Are you sure you want to change the fare(y/n): ");
+								while (getchar() != '\n'); // clear input buffer
+								scanf("%c",&surety);
+								if (surety=='y')  //checking if user surely wants to change the fare or not
+								{
+									sprintf(query,"update route_details set fare=%0.2f where route_id=%d",fare,route_id_array[choice-1]);
+									mysql_query(conn,query);
+									printf("\n--------  Fare has been successfully changed --------\n\n");
+								}
+								else printf("Transaction Canceled fare not changed !!!!!");
+								break;
+							}
+							while (getchar() != '\n'); // clear input buffer
+							printf("Please enter valid input !!!!!\n");
+							continue;
+						}
+						break;
+					}
+					while (getchar() != '\n'); // clear input buffer
+					printf("Please enter valid input !!!!!\n");
+					continue;
+				}
+				break;
+			case 2:
+				printf("changing total seats\n");
+				break;
+			case 3:
+				printf("Change ariivale/departure time\n");
+				break;
+			case 4:
+				printf("Change soruce / destination location\n");
+				break;
+			case 5:
+				printf("Deleting bus");
+				break;
+			case 99:
+				printf("Going back");
+				break;			
+			default:
+				printf("Please enter valid details !!!!!");
+				continue;
+			}
+			break;	
+		}
+		while (getchar() != '\n'); // clear input buffer
+		printf("\nPlease enter valid details!!!!!");
+		continue;
+	}
+	return 0;
+}
+
 int main(int argc, char const *argv[])
 {
 	conn = mysql_init(NULL);
@@ -540,7 +648,7 @@ int main(int argc, char const *argv[])
 	// printf("%d\n", uid_status);
 	// signup(); //started signup module if the user wants to register into the software
 
-	seat_availability(uid_status);
+	// seat_availability(uid_status);
 	
 	// add_bus();
 
@@ -548,7 +656,7 @@ int main(int argc, char const *argv[])
 
 	// cancel_seat(uid_status);
 
-
+	change_bus_details(uid_status);
 	
 	return 0;
 }
