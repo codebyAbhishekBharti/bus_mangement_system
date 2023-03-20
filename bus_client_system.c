@@ -651,7 +651,36 @@ int change_bus_details(int u_id){
 				}				
 				break;
 			case 3:
-				printf("Change ariivale/departure time\n");
+				printf("Change arival/departure time\n");
+				sprintf(query,"select rd.route_id,bd.bus_name,rd.from_location,rd.to_location,DATE_FORMAT(rd.departure_time, '%%H:%%i'),DATE_FORMAT(rd.arrival_time, '%%H:%%i') from bus_details bd join route_details rd on bd.bus_id=rd.bus_id where bd.owner_id=%d",u_id);
+				printf("%s\n",query );
+				mysql_query(conn,query);
+				res=mysql_store_result(conn);
+				printf("--------------------------------------------------------------------------------------------------\n");
+				printf("Sl No.  BUS NAME       SOURCE LOCATION    DESTINATION LOCATION     DEPARTURE TIME     ARRIVAL TIME\n");
+				printf("--------------------------------------------------------------------------------------------------\n");
+				while(row=mysql_fetch_row(res)){ //iterating through all the row provided by sql of the details of bus
+					id_array[i]=atoi(row[0]); //storing the bus_id for change the arrival/departure details of that bus
+					id_array = (int*) realloc(id_array, (i +1) * sizeof(int)); // Reallocate memory with new size
+					printf(" %-6d %-16s %-20s %-23s %-18s %s \n",i+1,row[1],row[2],row[3],row[4],row[5] ); //printing details
+					i++;
+				}
+				while (1){ //starting loop for handling wrong inputs
+					printf("\nEnter the Serial Number of bus whose arrival/departure time you want to change: ");
+					if (scanf("%d",&choice)==1 && (choice<=i || choice==99)) //condition to check for valid input
+					{
+						if (choice==99)  //termination condition
+						{
+							printf("Transaction Canceled total seats not changed !!!!!");
+							break;  //getting out of while loop without changing seats
+						}
+						printf("lagta hai sab thik hai");
+						break;
+					}
+					while (getchar() != '\n'); // clear input buffer
+					printf("Please enter valid input !!!!!\n");
+					continue;
+				}
 				break;
 			case 4:
 				printf("Change soruce / destination location\n");
