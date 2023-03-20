@@ -528,6 +528,10 @@ int change_bus_details(int u_id){
 	char from_location[50],to_location[50]; //stores data about the source and destination location of the bus route
 	int choice; //stores data about what variable details you user want to change
 	char query[200]; //stores mysql query to be executed
+	char surety; //stores data if the user is sure to change details
+	int i=0; //serial no. iteration for printing details of bus
+	int default_size=1; //default size of array
+	int* id_array = (int*) malloc(default_size * sizeof(default_size)); // Allocate initial memory for array	
 	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
 	printf("==================================================================================================\n");
 	printf("                                         CHANGE BUS DETAILS                                       \n");
@@ -545,10 +549,6 @@ int change_bus_details(int u_id){
 		{
 			switch(choice){
 			case 1:
-				int i=0; //serial no. iteration for printing details of bus
-				char surety; //stores data if the user is sure to change the fare of the bus
-				int default_size=1; //default size of array
-				int* route_id_array = (int*) malloc(default_size * sizeof(default_size)); // Allocate initial memory for array
 				//below line stores the sql command to fetch bus name, from location, to location and fare of bus where bus owner is user
 				sprintf(query,"select bd.bus_name,rd.from_location,rd.to_location,rd.fare,rd.route_id from bus_details bd join route_details rd on bd.bus_id = rd.bus_id where bd.owner_id=%d",u_id);
 				printf("%s\n",query);
@@ -558,8 +558,8 @@ int change_bus_details(int u_id){
 				printf("Sl. No.      Bus Name         Source Location        Destination Location         Fare            \n");
 				printf("--------------------------------------------------------------------------------------------------\n");
 				while(row=mysql_fetch_row(res)){ //iterating through all the row present in the result of mysql
-					route_id_array[i]=atoi(row[4]);  //storing route id of bus in an array
-					route_id_array = (int*) realloc(route_id_array, (i +1) * sizeof(int)); // Reallocate memory with new size
+					id_array[i]=atoi(row[4]);  //storing route id of bus in an array
+					id_array = (int*) realloc(id_array, (i +1) * sizeof(int)); // Reallocate memory with new size
 					printf("%-12d %-16s %-22s %-28s %s\n",i+1,row[0],row[1],row[2],row[3],row[4]);  //printing sql data
 					i++;
 				}
@@ -582,7 +582,7 @@ int change_bus_details(int u_id){
 								scanf("%c",&surety);
 								if (surety=='y')  //checking if user surely wants to change the fare or not
 								{
-									sprintf(query,"update route_details set fare=%0.2f where route_id=%d",fare,route_id_array[choice-1]);
+									sprintf(query,"update route_details set fare=%0.2f where route_id=%d",fare,id_array[choice-1]);
 									mysql_query(conn,query);
 									printf("\n--------  Fare has been successfully changed --------\n\n");
 								}
@@ -601,7 +601,54 @@ int change_bus_details(int u_id){
 				}
 				break;
 			case 2:
-				printf("changing total seats\n");
+				sprintf(query,"select bus_id,bus_name,total_seats from bus_details where owner_id=%d",u_id); //storing mysql query to fetch bus id, bus name and total bus which is owned by that user
+ 				mysql_query(conn,query); //executing sql query
+				res=mysql_store_result(conn); //stroing the result of mysql
+				printf("--------------------------------------------------------------------------------------------------\n");
+				printf("          Sl No.                               BUS NAME                      TOTAL SEATS          \n");
+				printf("--------------------------------------------------------------------------------------------------\n");
+				while(row=mysql_fetch_row(res)){ //iterating till last row to print details of bus
+					id_array[i]=atoi(row[0]); //storing the bus_id for change the total seats details of that bus
+					id_array = (int*) realloc(id_array, (i +1) * sizeof(int)); // Reallocate memory with new size
+					printf("             %-30d %-35s %s\n",i+1,row[1],row[2]); //printing data
+					i++;  //increasing the value of i so that next serial as well as reallocation of memory can be done
+				}
+				while (1){ //starting loop for handling wrong inputs
+					printf("\nEnter the Serial Number of bus whose total seats you want to change: ");
+					if (scanf("%d",&choice)==1 && (choice<=i || choice==99)) //condition to check for valid input
+					{
+						if (choice==99)  //termination condition
+						{
+							printf("Transaction Canceled total seats not changed !!!!!");
+							break;  //getting out of while loop without changing seats
+						}
+						while (1){  //starting loop to handle wrong inputs
+							printf("\nEnter the total new seats: ");
+							if (scanf("%d",&seats)==1)
+							{
+								printf("\n\n Are you sure you want to change total seats(y/n): ");
+								while (getchar() != '\n'); // clear input buffer
+								scanf("%c",&surety);
+								if (surety=='y')  //checking if user surely wants to change the total seats or not
+								{
+									//below line stores the sql query to change the total seats provided as by bus owner
+									sprintf(query,"update bus_details set total_seats=%d where bus_id=%d",seats,id_array[choice-1]);
+									mysql_query(conn,query); //executing sql command
+									printf("\n--------  Total seats has been successfully changed --------\n\n");
+								}
+								else printf("Transaction Canceled fare not changed !!!!!");
+								break;
+							}
+							while (getchar() != '\n'); // clear input buffer
+							printf("Please enter valid input !!!!!\n");
+							continue;
+						}
+						break;
+					}
+					while (getchar() != '\n'); // clear input buffer
+					printf("Please enter valid input !!!!!\n");
+					continue;
+				}				
 				break;
 			case 3:
 				printf("Change ariivale/departure time\n");
