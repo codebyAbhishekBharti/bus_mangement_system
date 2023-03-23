@@ -524,7 +524,7 @@ int change_bus_details(int u_id){
 	/* this function is responsible for change the details of bus, route details or deleting a bus*/
 	float fare; //stores fare of the bus in a particular route
 	int seats; //stores total no of seats in a particular bus
-	char departure_time[9],arrival_time[9]; //stores data about departure and arrival timing of the bus
+	char departure_time[6]="\0\0\0\0\0\0",arrival_time[6]="\0\0\0\0\0\0"; //stores data about departure and arrival timing of the bus
 	char from_location[50],to_location[50]; //stores data about the source and destination location of the bus route
 	int choice; //stores data about what variable details you user want to change
 	char query[200]; //stores mysql query to be executed
@@ -651,19 +651,24 @@ int change_bus_details(int u_id){
 				}				
 				break;
 			case 3:
-				printf("Change arival/departure time\n");
+				char **depart_time_array= malloc(default_size * sizeof(char *));    // Allocate initial memory for array to store departure time of bus
+				char **arrival_time_array= malloc(default_size * sizeof(char *));   // Allocate initial memory for array to store arrival time of bus
+				//below is sql command which fetch route id, bus name, source location, destination location, departure time, arrival time of the bus to modify the time deatils if required
 				sprintf(query,"select rd.route_id,bd.bus_name,rd.from_location,rd.to_location,DATE_FORMAT(rd.departure_time, '%%H:%%i'),DATE_FORMAT(rd.arrival_time, '%%H:%%i') from bus_details bd join route_details rd on bd.bus_id=rd.bus_id where bd.owner_id=%d",u_id);
-				printf("%s\n",query );
-				mysql_query(conn,query);
-				res=mysql_store_result(conn);
+				mysql_query(conn,query); //executing sql query
+				res=mysql_store_result(conn); //storing sql result
 				printf("--------------------------------------------------------------------------------------------------\n");
 				printf("Sl No.  BUS NAME       SOURCE LOCATION    DESTINATION LOCATION     DEPARTURE TIME     ARRIVAL TIME\n");
 				printf("--------------------------------------------------------------------------------------------------\n");
 				while(row=mysql_fetch_row(res)){ //iterating through all the row provided by sql of the details of bus
 					id_array[i]=atoi(row[0]); //storing the bus_id for change the arrival/departure details of that bus
+					depart_time_array[i]=row[4]; //storing the departure time of bus 
+					arrival_time_array[i]=row[5];  //storing the arrival tiem of bus
 					id_array = (int*) realloc(id_array, (i +1) * sizeof(int)); // Reallocate memory with new size
+					depart_time_array = realloc(depart_time_array, (i+1) * sizeof(char *)); //rellocate memory with new size
+					arrival_time_array = realloc(arrival_time_array, (i+1) * sizeof(char *)); //reallocate memory with new size
 					printf(" %-6d %-16s %-20s %-23s %-18s %s \n",i+1,row[1],row[2],row[3],row[4],row[5] ); //printing details
-					i++;
+					i++;  //increasing the value for next iteration
 				}
 				while (1){ //starting loop for handling wrong inputs
 					printf("\nEnter the Serial Number of bus whose arrival/departure time you want to change: ");
@@ -671,11 +676,34 @@ int change_bus_details(int u_id){
 					{
 						if (choice==99)  //termination condition
 						{
-							printf("Transaction Canceled total seats not changed !!!!!");
-							break;  //getting out of while loop without changing seats
+							printf("Transaction Canceled arrival/departure time not changed !!!!!");
+							break;  //getting out of while loop without changing arrival/departure time
 						}
-						printf("lagta hai sab thik hai");
-						break;
+						while (getchar() != '\n'); // clear input buffer
+						printf("\nEnter new departure time (HH:MM, hit enter to skip): ");
+						gets(departure_time);
+						if (departure_time[0]=='\0' || departure_time[0]=='\n'){
+							/*copying the data of the array to a variable
+							 where strcspn is fetching the first new line character in the data and getting with index
+							 strncpy is copying the data to new varibale */
+							// departure_time=depart_time_array[choice-1];
+							strncpy(departure_time, depart_time_array[choice-1], strcspn(depart_time_array[choice-1], "\n"));
+						}
+						printf("\nEnter new arrival time (HH:MM, hit enter to skip): ");
+						gets(arrival_time);
+						if (arrival_time[0]=='\0' || arrival_time[0]=='\n'){
+							// copying the data from the array and storing the data pointer to a variable
+							// arrival_time=arrival_time_array[choice-1];
+							strncpy(arrival_time, arrival_time_array[choice-1], strcspn(arrival_time_array[choice-1], "\n"));
+						}
+						// storing sql command to query variable which will update the required value to the database
+						sprintf(query,"update route_details set departure_time='%s', arrival_time='%s' where route_id=%d",departure_time,arrival_time,id_array[choice-1]);
+						// printf("%s\n",query );
+						mysql_query(conn,query); //executing sql command
+						int check_consistency = mysql_affected_rows(conn);  //checking if query ran successfully or not this funcation will return -1 if error in command , 0 if there is no row affected else total now affected
+						if (check_consistency>=1) printf("\n--------  Departure/Arrival time has been successfully changed --------\n\n");  //printing this details if any row is getting updated
+						else printf("\n--------  Transaction Canceled arrival/departure time not changed !!!!! --------\n\n");  //printing if there is not change in database
+						break;  //getting out of switch case
 					}
 					while (getchar() != '\n'); // clear input buffer
 					printf("Please enter valid input !!!!!\n");
