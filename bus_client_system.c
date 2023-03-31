@@ -711,7 +711,6 @@ int change_bus_details(int u_id){
 				}
 				break;
 			case 4:
-				printf("Change soruce / destination location\n");
 				char **source_location_array= malloc(default_size * sizeof(char *));    // Allocate initial memory for array to store departure time of bus
 				char **destination_location_array= malloc(default_size * sizeof(char *));   // Allocate initial memory for array to store arrival time of bus
 				//below is sql command which fetch route id, bus name, source location, destination location, departure time, arrival time of the bus to modify the time deatils if required
@@ -723,8 +722,8 @@ int change_bus_details(int u_id){
 				printf("--------------------------------------------------------------------------------------------------\n");
 				while(row=mysql_fetch_row(res)){ //iterating through all the row provided by sql of the details of bus
 					id_array[i]=atoi(row[0]); //storing the bus_id for change the arrival/departure details of that bus
-					source_location_array[i]=row[2]; //storing the departure date of bus 
-					destination_location_array[i]=row[3];  //storing the arrival date of bus
+					source_location_array[i]=row[2]; //storing the source location of bus in array
+					destination_location_array[i]=row[3];  //storing the destination location of bus in array
 					id_array = (int*) realloc(id_array, (i +1) * sizeof(int)); // Reallocate memory with new size
 					source_location_array = realloc(source_location_array, (i+1) * sizeof(char *)); //rellocate memory with new size
 					destination_location_array = realloc(destination_location_array, (i+1) * sizeof(char *)); //reallocate memory with new size
@@ -743,7 +742,7 @@ int change_bus_details(int u_id){
 						while (getchar() != '\n'); // clear input buffer
 						printf("\nEnter new source location time (hit enter to skip): ");
 						gets(from_location);
-						if (from_location[0]=='\0' || from_location[0]=='\n'){
+						if (from_location[0]=='\0'){
 							/*copying the data of the array to a variable
 							 where strcspn is fetching the first new line character in the data and getting with index
 							 strncpy is copying the data to new varibale */
@@ -751,17 +750,13 @@ int change_bus_details(int u_id){
 						}
 						printf("\nEnter new departure location time (hit enter to skip): ");
 						gets(to_location);
-						// printf("%shello\n",to_location);						
-						if (to_location[0]=='\0' || to_location[0]=='\n'){
+						if (to_location[0]=='\0'){
 							// copying the data from the array and storing the data pointer to a variable
 							strncpy(to_location, destination_location_array[choice-1],strcspn(destination_location_array[choice-1], "\n")+1);
 						}
-						printf("%s\n",from_location );
-						printf("%s\n",to_location);
-						exit(2);
 						// storing sql command to query variable which will update the required value to the database
 						sprintf(query,"update route_details set from_location='%s', to_location='%s' where route_id=%d",from_location,to_location,id_array[choice-1]);
-						printf("%s\n",query );
+						// printf("%s\n",query );
 						mysql_query(conn,query); //executing sql command
 						int check_consistency = mysql_affected_rows(conn);  //checking if query ran successfully or not this funcation will return -1 if error in command , 0 if there is no row affected else total now affected
 						if (check_consistency>=1) printf("\n--------  Source/Destination location has been successfully changed --------\n\n");  //printing this details if any row is getting updated
