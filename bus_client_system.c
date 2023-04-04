@@ -10,19 +10,6 @@ MYSQL_ROW row;
 
 char* return_today_date();
 int check_existance_in_array(int num, int arr[], int t_array_value);
-
-int check_available_bus_or_not(int total_bus, char **bus_list) {
-	/* This funcation helps us to find if there is any bus between two location or not
-		it will return 0 if theres will be not bus between station
-		else if there will be any bus between station then it will return 1 */
-	int count = 0;
-	for (int i = 0; i <= total_bus; ++i)
-	{
-		if (strcmp(bus_list[i], "0") != 0) count++;
-	}
-	return count;
-}
-
 int check_existance_in_array(int num, int arr[], int t_array_value) {
 	/* This funcation will check if a number is present in the array or not
 	if number will be in the array then it will return 1
