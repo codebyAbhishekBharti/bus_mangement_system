@@ -117,8 +117,9 @@ int book_ticket(int bus_id, char journey_date[11], int u_id, int route_id) {
 void seat_availability(int u_id) {
 	/* This funcation will help to show the lists of all the vacant seats for a particular route */
 	char date[11] = "08-03-2023", source_location[50] = "Amritsar", destination_location[50] = "Jalandhar",bus_name[50]; //stores differentt details to search about seat availability
+	char arrival_time[50],departure_time[50];
 	int total_seats,selected_bus; //stores the total seats in the bus and selected bus not in the list
-	float rating; //stores the rating of bus
+	float rating,fare; //stores the rating and fare of bus
 	int day, month, year; //stores day, month , year of journey
 	char query[200]; //stores sql command to execute
 	int default_size = 1; //default size of array
@@ -146,7 +147,7 @@ void seat_availability(int u_id) {
 			continue;
 		}
 	}
-	// printf("%s %s %s\n ",date,source_location,destination_location);
+	printf("%s %s %s\n ",date,source_location,destination_location);
 
 	//below sql command fetches bus id, bus name and route id for the bus which goes to the source and destination location given by the user
 	sprintf(query, "select bd.bus_id,bd.bus_name,rd.route_id from bus_details bd join route_details rd on bd.bus_id = rd.bus_id where rd.from_location='%s' AND rd.to_location='%s'", source_location, destination_location);
@@ -161,7 +162,7 @@ void seat_availability(int u_id) {
 		printf("--------------------------------------------------------------------------------------------------\n");
 		int i = 0; //initializing i for printig details
 		while (row = mysql_fetch_row(res)) {  //this loop iterates till all the rows in the mysql result of bus details
-			bus_id_array[i] = atoi(row[0]); //storing route id of bus in an array
+			bus_id_array[i] = atoi(row[0]); //storing bus id of bus in an array
 			route_id_array[i] = atoi(row[2]); //storing route id of bus in an array
 			bus_id_array = (int*) realloc(bus_id_array, (i + 1) * sizeof(int)); // Reallocate memory with new size
 			route_id_array = (int*) realloc(route_id_array, (i + 1) * sizeof(int)); // Reallocate memory with new size
@@ -173,14 +174,17 @@ void seat_availability(int u_id) {
 			printf("\nEnter the bus no. you want to check for seat availability: ");
 			if (scanf("%d", &selected_bus) == 1 && selected_bus < i && selected_bus > 0) //validiates if right bus serial no is selected
 			{
-				//below sql command stores sql command to fetch bus name, rating and total seats of the bus
-				sprintf(query,"select bus_name,rating,total_seats from bus_details where bus_id=%d",bus_id_array[selected_bus-1]);
+				//below sql command stores sql command to fetch bus name, rating, total seats, departure time, arrival time and fare of the bus
+				sprintf(query,"select bd.bus_name, bd.rating, bd.total_seats, rd.departure_time, rd.arrival_time, rd.fare from bus_details bd join route_details rd on rd.bus_id = bd.bus_id where bd.bus_id=%d",bus_id_array[selected_bus-1]);
 				mysql_query(conn,query); //executing sql command
 				res=mysql_store_result(conn); //storing result of sql command
 				row=mysql_fetch_row(res); //fetching the first row of sql result
 				strcpy(bus_name,row[0]); // storing bus name in bus_name variable 
 				rating=atof(row[1]); //storing rating of bus 
 				total_seats=atoi(row[2]); //storing total seats in the bus
+				strcpy(departure_time,row[3]); //store the departure time of the bus
+				strcpy(arrival_time,row[4]); //stores the arrival time of bus to destination
+				fare=atof(row[5]);  //stores the fare prince of that bus
 				// below line stores sql command to get all the seats which is booked for the bus on the particular date
 				sprintf(query,"select seat_no from booking_details where bus_id=%d and  journey_date=STR_TO_DATE('%s', '%%d-%%m-%%Y') and cancel_status=0",bus_id_array[selected_bus-1],date);
 				mysql_query(conn,query); //executes sql command 
@@ -195,7 +199,8 @@ void seat_availability(int u_id) {
 				mysql_free_result(res);				//clearing sql result
 
 				printf("\e[1;1H\e[2J");    //this will clear the terminal screen
-				printf("\n Source Location: %s           Destination Location: %s             Date: %s\n",source_location,destination_location,date);
+				printf("\n Source Location: %s           Destination Location: %s             Date: %s",source_location,destination_location,date);
+				printf("\n Departure Time:  %s           Arrival Time:         %s              Fare: %0.2f",departure_time,arrival_time,fare);
 				printf("\n Bus Name: %s                  Rating: %0.1f\n",bus_name,rating);
 				printf("==================================================================================================\n");
 				printf("                                       SEAT AVAILABILITY DATA                                     \n");
