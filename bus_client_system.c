@@ -25,15 +25,11 @@ int check_already_booked(int bus_id, char date[], char *token) {
 	if all the seats are not vacant then it will return 1
 	else it will return 0*/
 	char str[200];
-	// sprintf(str,"select count(booking_id) from booking_details where bus_id=%d and journey_date='%s' and seat_no=%s and cancel_status=0",bus_id,date,token);
 	while (token != NULL) {
-		sprintf(str, "select count(booking_id) from booking_details where bus_id=%d and journey_date='%s' and seat_no=%s and cancel_status=0", bus_id, date, token);
+		sprintf(str, "select count(booking_id) from booking_details where bus_id=%d and journey_date=STR_TO_DATE('%s', '%%d-%%m-%%Y') and seat_no=%s and cancel_status=0", bus_id, date, token);
 		mysql_query(conn, str);
 		res = mysql_store_result(conn);
-		if (atoi(mysql_fetch_row(res)[0]) != 0)
-		{
-			return 1;
-		}
+		if (atoi(mysql_fetch_row(res)[0]) != 0) return 1;
 		token = strtok(NULL, " ");
 	}
 	return 0;
@@ -50,76 +46,97 @@ int check_range_seat(int total_seats, char *token) {
 	}
 	return 0;
 }
-int book_ticket(int bus_id, char journey_date[11], int u_id, int route_id) {
+
+int book_ticket(int bus_id, char journey_date[11], int u_id, int route_id, int total_seats) {
 	/* this funcation will help to book the desired seat by the passenger */
-	char payment_choice;
-	printf("%d %s %d %d\n",bus_id,journey_date,u_id,route_id);
-	char seats[200] = "13", str[200];
-	int total_seat_to_book = 0;
-	// printf("\n*Enter the seat not one space seperated if you want to book multiple seat. \n");
-	// printf("Enter the seat no : ");
-	// scanf("%[^\n]%*c",seats);
-	// printf("%s",seats);
-	char *token = strtok(seats, " ");
-	char *token_copy = token;
-	char *token_copy2 = token;
-	char *token_copy3 = token;
-
-	char * today_date = return_today_date();
-
-	while (token_copy3 != NULL) {
-		//this will count total no of seats to book and store the data in total_seat_to_to_book variable
-		total_seat_to_book++;
-		token_copy3 = strtok(NULL, " ");
-	}
-
-	// printf("%d total no seats to book",total_seat_to_book);
-
-	// insert into booking_details (bus_id,journey_date,u_id,seat_no) values (1,'2023-03-08',1,5);
-	sprintf(str, "select total_seats from bus_details where bus_id=%d", bus_id);
-	mysql_query(conn, str);
-	res = mysql_store_result(conn);
-	int total_seats = atoi(mysql_fetch_row(res)[0]);
-	// printf("%d",checked_status_already_booked);
-	if (check_range_seat(total_seats, token_copy2) == 0)
-	{
-		if (check_already_booked(bus_id, journey_date, token_copy) == 0)
+	char query[200];  //this variable will store the sql command to execute
+	char seats[200]; //string which will contain which seat user want to book
+	char payment_choice;  //this will store the users choice whether he wants to book the ticket or not
+	char * today_date = return_today_date();  //stores todays date
+	while (1) {  //running this loop to handle if user enters wrong value
+		int total_seat_to_book = 0; //setting initial value for total seats user wants to book
+		int is_all_integer = 1; //setting value to check the value entered by the user is all numeric or not
+		int check_presence_list[total_seats]; // initialize a interger array to very that user must not entered the same seat no
+		for (int i = 0; i < total_seats; ++i) check_presence_list[i] = 0; //setting all value to 0
+		printf("\nEnter 99 to cancel booking");
+		printf("\n*Enter the seat not one space separated if you want to book multiple seats. \n");
+		printf("Enter the seat no : ");
+		scanf("%[^\n]%*c", seats);  //taking string input from the user
+		if (strcmp(seats, "99") == 0)  //checkig if user wants to exit the booking window
 		{
-			while (token != NULL) {
-				// printf("%s\n", token);
-				// select fare from route_details where bus_id=2 and from_location='Amritsar' and to_location='Jalandhar';
-				sprintf(str, "select fare from route_details where route_id=%d", route_id);
-				mysql_query(conn, str);
-				res = mysql_store_result(conn);
-				float price_per_seat = atoi(mysql_fetch_row(res)[0]);
-				// printf("%0.1f",price_per_seat);
+			printf("----------- Exiting Booking -----------\n");
+			exit(0);
+		}
+		char *token_copy = strdup(seats); // make a copy of the original input string for checking if all the value is integer
+		char *token_copy2 = strdup(seats);  //copy the original input string to make the token for inserting all the seat no in the database
+		char *token = strtok(token_copy, " ");  //creating the token for checking if all the value is integer or not
+		while (token != NULL) {  //loop for iterating over all the tokens
+			int num = atoi(token); //converting the token data into integer
+			if (num == 0 && *token != '0' || num > total_seats  || check_presence_list[num] == 1) { //checking if the token value is integer and not repeated 
+				is_all_integer = 0; //setting the value if any non integer no found
+				break; //breaking this while loop
+			}
+			else {
+				check_presence_list[num] = 1; //setting the value in array so to check for no duplicacy
+				total_seat_to_book += 1; //increating the count of total seats to book 
+			}
+			token = strtok(NULL, " ");  //removing that token
+		}
+
+		if (is_all_integer) {  //works only if users has entered all integer value and non repeating value
+			token = strtok(seats, " ");  //creating this token to check if all seats are available for booking or not
+			if (check_already_booked(bus_id, journey_date, token) == 0)  //check_already_booked function is checking whether seats are available for booking or not
+			{
+				// below sql command gets the fare of bus between stops
+				sprintf(query, "select fare from route_details where route_id=%d", route_id);
+				mysql_query(conn, query);  //executing sql command
+				res = mysql_store_result(conn); //storing the result of sql
+				float price_per_seat = atof(mysql_fetch_row(res)[0]); //storing the fare charge
 				printf("--------------------------------------------------------------------------------------------------\n");
 				printf("       TOTAL FARE CHARGE : %0.2f\n", price_per_seat * total_seat_to_book);
 				printf("--------------------------------------------------------------------------------------------------\n");
 				printf("\nPress 'y' to pay the amount: ");
-				scanf(" %c", &payment_choice);
+				scanf(" %c", &payment_choice);  //taking input from user to varify whether user wants to book the ticket or not
 				if (payment_choice == 'y')
 				{
-					sprintf(str, "insert into booking_details (bus_id,booking_date,journey_date,u_id,seat_no) values (%d,'%s','%s',%d,%s)", bus_id, today_date, journey_date, u_id, token);
-					mysql_query(conn, str);
-					printf("\n--- Congratulation! Your seats has been booked ---");
+					token = strtok(token_copy2, " "); //creating this token to book all the seats in database.
+					if (mysql_query(conn, "start transaction") != 0)  //starting transaction so to protect again any insertion error
+					{
+						printf("Unable to start transaction\n");
+						exit(0);
+					}
+					while (token != NULL) { //iterating over all the values entred by the user
+						//below sql command books the seat for the user by saving the booking data in booking_details table of the mysql server
+						sprintf(query, "insert into booking_details (bus_id,booking_date,journey_date,u_id,seat_no) values (%d,'%s',STR_TO_DATE('%s', '%%d-%%m-%%Y'),%d,%s)", bus_id, today_date, journey_date, u_id, token);
+						if (mysql_query(conn, query) != 0) {  //executing command and checking for any error which can occur
+							printf("!!!!!!!!! Failed to book seats !!!!!!!!!\n");
+							mysql_query(conn, "ROLLBACK"); //in case of any error all tranaction will will back
+						}
+						token = strtok(NULL, " ");
+					}
+					if (mysql_query(conn, "commit") != 0) {  //finally commiting all the values to the database if there is not error
+						printf("!!!!!!!!! Failed to book seats !!!!!!!!!\n");
+						mysql_query(conn, "ROLLBACK"); // if there will be any error and roll back all the transaction
+					}
+					else printf("\n--- Congratulation! Your seats has been booked ---");
 				}
 				else printf("\n---- Payment Failed !!!! ----\nSorry! Unable to book ticket.... \n");
-
-				token = strtok(NULL, " ");
+				break;
 			}
+			else printf("\n!!!!!! Seat is already booked. Choose another seat !!!!!!");
+		} else {
+			printf("\n!!!!!! Please enter the right seat no. !!!!!!");
 		}
-		else printf("\n--- Sorry! Your selected seat are already booked ---\n");
 	}
-	else printf("\n--- Sorry! Please enter the correct Seat number ---\n");
+	return 0;
 }
 
 void seat_availability(int u_id) {
 	/* This funcation will help to show the lists of all the vacant seats for a particular route */
-	char date[11] = "08-03-2023", source_location[50] = "Amritsar", destination_location[50] = "Jalandhar",bus_name[50]; //stores differentt details to search about seat availability
-	char arrival_time[50],departure_time[50];
-	int total_seats,selected_bus; //stores the total seats in the bus and selected bus not in the list
-	float rating,fare; //stores the rating and fare of bus
+	char date[11] = "08-03-2023", source_location[50] = "Amritsar", destination_location[50] = "Jalandhar", bus_name[50]; //stores differentt details to search about seat availability
+	char arrival_time[50], departure_time[50];
+	int total_seats, selected_bus; //stores the total seats in the bus and selected bus not in the list
+	float rating, fare; //stores the rating and fare of bus
 	int day, month, year; //stores day, month , year of journey
 	char query[200]; //stores sql command to execute
 	int default_size = 1; //default size of array
@@ -147,7 +164,7 @@ void seat_availability(int u_id) {
 			continue;
 		}
 	}
-	printf("%s %s %s\n ",date,source_location,destination_location);
+	// printf("%s %s %s\n ",date,source_location,destination_location);
 
 	//below sql command fetches bus id, bus name and route id for the bus which goes to the source and destination location given by the user
 	sprintf(query, "select bd.bus_id,bd.bus_name,rd.route_id from bus_details bd join route_details rd on bd.bus_id = rd.bus_id where rd.from_location='%s' AND rd.to_location='%s'", source_location, destination_location);
@@ -170,56 +187,58 @@ void seat_availability(int u_id) {
 			printf("                             %-21d %s \n", i + 1, row[1]); //printing details
 			i++;
 		}
-		while (1) { //initilizing this loop for restrict false inputs 
+		while (1) { //initilizing this loop for restrict false inputs
 			printf("\nEnter the bus no. you want to check for seat availability: ");
-			if (scanf("%d", &selected_bus) == 1 && selected_bus < i && selected_bus > 0) //validiates if right bus serial no is selected
+			// if (scanf("%d", &selected_bus) == 1 && selected_bus < i && selected_bus > 0) //validiates if right bus serial no is selected
+			selected_bus = 1 ;
+			if (selected_bus < i && selected_bus > 0) //validiates if right bus serial no is selected
 			{
 				//below sql command stores sql command to fetch bus name, rating, total seats, departure time, arrival time and fare of the bus
-				sprintf(query,"select bd.bus_name, bd.rating, bd.total_seats, rd.departure_time, rd.arrival_time, rd.fare from bus_details bd join route_details rd on rd.bus_id = bd.bus_id where bd.bus_id=%d",bus_id_array[selected_bus-1]);
-				mysql_query(conn,query); //executing sql command
-				res=mysql_store_result(conn); //storing result of sql command
-				row=mysql_fetch_row(res); //fetching the first row of sql result
-				strcpy(bus_name,row[0]); // storing bus name in bus_name variable 
-				rating=atof(row[1]); //storing rating of bus 
-				total_seats=atoi(row[2]); //storing total seats in the bus
-				strcpy(departure_time,row[3]); //store the departure time of the bus
-				strcpy(arrival_time,row[4]); //stores the arrival time of bus to destination
-				fare=atof(row[5]);  //stores the fare prince of that bus
+				sprintf(query, "select bd.bus_name, bd.rating, bd.total_seats, rd.departure_time, rd.arrival_time, rd.fare from bus_details bd join route_details rd on rd.bus_id = bd.bus_id where bd.bus_id=%d", bus_id_array[selected_bus - 1]);
+				mysql_query(conn, query); //executing sql command
+				res = mysql_store_result(conn); //storing result of sql command
+				row = mysql_fetch_row(res); //fetching the first row of sql result
+				strcpy(bus_name, row[0]); // storing bus name in bus_name variable
+				rating = atof(row[1]); //storing rating of bus
+				total_seats = atoi(row[2]); //storing total seats in the bus
+				strcpy(departure_time, row[3]); //store the departure time of the bus
+				strcpy(arrival_time, row[4]); //stores the arrival time of bus to destination
+				fare = atof(row[5]); //stores the fare prince of that bus
 				// below line stores sql command to get all the seats which is booked for the bus on the particular date
-				sprintf(query,"select seat_no from booking_details where bus_id=%d and  journey_date=STR_TO_DATE('%s', '%%d-%%m-%%Y') and cancel_status=0",bus_id_array[selected_bus-1],date);
-				mysql_query(conn,query); //executes sql command 
-				res=mysql_store_result(conn); //storing sql command
+				sprintf(query, "select seat_no from booking_details where bus_id=%d and  journey_date=STR_TO_DATE('%s', '%%d-%%m-%%Y') and cancel_status=0", bus_id_array[selected_bus - 1], date);
+				mysql_query(conn, query); //executes sql command
+				res = mysql_store_result(conn); //storing sql command
 				int booked_seat_array[total_seats];  //initializing array which stores all the booked seats for the bus
-				for (int i = 0; i <= total_seats; ++i) booked_seat_array[i]=0;  //creating an empty array
-				i=0; //initilizing i to reset value 
-				while(row=mysql_fetch_row(res)){  //fetching row of the sql result 
-					booked_seat_array[i]=atoi(row[0]); //setting the data to the array
+				for (int i = 0; i <= total_seats; ++i) booked_seat_array[i] = 0; //creating an empty array
+				i = 0; //initilizing i to reset value
+				while (row = mysql_fetch_row(res)) { //fetching row of the sql result
+					booked_seat_array[i] = atoi(row[0]); //setting the data to the array
 					i++;
 				}
 				mysql_free_result(res);				//clearing sql result
 
 				printf("\e[1;1H\e[2J");    //this will clear the terminal screen
-				printf("\n Source Location: %s           Destination Location: %s             Date: %s",source_location,destination_location,date);
-				printf("\n Departure Time:  %s           Arrival Time:         %s              Fare: %0.2f",departure_time,arrival_time,fare);
-				printf("\n Bus Name: %s                  Rating: %0.1f\n",bus_name,rating);
+				printf("\n Source Location: %s           Destination Location: %s             Date: %s", source_location, destination_location, date);
+				printf("\n Departure Time:  %s           Arrival Time:         %s              Fare: %0.2f", departure_time, arrival_time, fare);
+				printf("\n Bus Name: %s                  Rating: %0.1f\n", bus_name, rating);
 				printf("==================================================================================================\n");
 				printf("                                       SEAT AVAILABILITY DATA                                     \n");
 				printf("==================================================================================================\n");
-				printf("\n");		
-				for (int i = 1; i <=total_seats ; ++i) // executing this loop for iterating every seats for printing the booking details in beautiful manner
+				printf("\n");
+				for (int i = 1; i <= total_seats ; ++i) // executing this loop for iterating every seats for printing the booking details in beautiful manner
 				{
-					printf("      [%d] ",i); //priting the seat no 
-					(i<10)?printf(" "):printf(""); //adding extra space if seat no is less than 10
-					(check_existance_in_array(i,booked_seat_array,total_seats))?printf(" Booked  "):printf("         "); //printing if the seat is booked or not
-					if (i%5==0)	printf("\n\n");  //moving to new line if 5 seat detail is already printed
+					printf("      [%d] ", i); //priting the seat no
+					(i < 10) ? printf(" ") : printf(""); //adding extra space if seat no is less than 10
+					(check_existance_in_array(i, booked_seat_array, total_seats)) ? printf(" Booked  ") : printf("         "); //printing if the seat is booked or not
+					if (i % 5 == 0)	printf("\n\n"); //moving to new line if 5 seat detail is already printed
 				}
-				printf("\n Do you want to book the seat (Yes/No)? "); 
-				scanf(" %c",&command); //storing value to ask user if he wants to book seat or not 
-				// command='y'; //setting default value for command to book ticket or not
-				if ((int)command==89 || (int)command==121){ //checking for the valid input y=121 and Y=89
-					int bus_id = bus_id_array[selected_bus-1]; //storing the bus id 
-					int route_id = route_id_array[selected_bus-1]; //storing route id 
-					book_ticket(bus_id,date,u_id,route_id);  //going to book_ticket module if user want to book the seat
+				// printf("\n Do you want to book the seat (Yes/No)? ");
+				// scanf(" %c",&command); //storing value to ask user if he wants to book seat or not
+				command = 'y'; //setting default value for command to book ticket or not
+				if ((int)command == 89 || (int)command == 121) { //checking for the valid input y=121 and Y=89
+					int bus_id = bus_id_array[selected_bus - 1]; //storing the bus id
+					int route_id = route_id_array[selected_bus - 1]; //storing route id
+					book_ticket(bus_id, date, u_id, route_id, total_seats); //going to book_ticket module if user want to book the seat
 				}
 				break;
 			}
