@@ -72,13 +72,13 @@ int book_ticket(int bus_id, char journey_date[11], int u_id, int route_id, int t
 		char *token = strtok(token_copy, " ");  //creating the token for checking if all the value is integer or not
 		while (token != NULL) {  //loop for iterating over all the tokens
 			int num = atoi(token); //converting the token data into integer
-			if (num == 0 && *token != '0' || num > total_seats  || check_presence_list[num] == 1) { //checking if the token value is integer and not repeated 
+			if (num == 0 && *token != '0' || num > total_seats  || check_presence_list[num] == 1) { //checking if the token value is integer and not repeated
 				is_all_integer = 0; //setting the value if any non integer no found
 				break; //breaking this while loop
 			}
 			else {
 				check_presence_list[num] = 1; //setting the value in array so to check for no duplicacy
-				total_seat_to_book += 1; //increating the count of total seats to book 
+				total_seat_to_book += 1; //increating the count of total seats to book
 			}
 			token = strtok(NULL, " ");  //removing that token
 		}
@@ -146,18 +146,18 @@ void seat_availability(int u_id) {
 	while (1){
 		printf("Enter the journey date (dd-mm-yyyy):- ");
 		int check1 = scanf("%02d-%02d-%04d", &day, &month, &year);
-		while(getchar()!='\n'); //clearing input buffer
+		while (getchar() != '\n'); //clearing input buffer
 		printf("Enter the source location:- ");
-		int check2 = scanf(" %[^\n]%*c",&source_location);
+		int check2 = scanf(" %[^\n]%*c", &source_location);
 		printf("Enter the destination location:- ");
-		int check3 = scanf("%[^\n]%*c",&destination_location);
+		int check3 = scanf("%[^\n]%*c", &destination_location);
 		// printf("%d %d %d\n",check1,check2,check3 );
-		if (check1==3 && check2==1 && check3==1)
+		if (check1 == 3 && check2 == 1 && check3 == 1)
 		{
 			sprintf(date, "%02d-%02d-%04d", day, month, year);  //stores the day,month,year in date variable in particular format
 			break;
 		}
-		else{
+		else {
 			printf("\e[1;1H\e[2J");    //this will clear the terminal screen
 			printf("Please enter valid data !!!!\n\n");
 			// while (getchar() != '\n'); // clear input buffer
@@ -248,7 +248,7 @@ void seat_availability(int u_id) {
 	}
 	else printf("\n--- SORRY, THERE IS NO BUS FOR THIS LOCATION ---\n");
 }
-// create trigger lowercase_from_location before insert on route_details for each row set new.from_location = new.from_location;
+
 int add_bus(int u_id)
 {
 	char str[200];
@@ -256,37 +256,59 @@ int add_bus(int u_id)
 	float rating = 5, fare = 40;
 	int total_seats = 20;
 
-	printf("\n============  ENTER THE DETAILS TO ADD BUS  ============\n\n");
-	printf("Enter bus name:                     ");
-	scanf("%[^\n]%*c", &bus_name);
-	printf("Souce location of bus:              ");
-	scanf("%[^\n]%*c", &from_location);
-	printf("Destination location of bus:        ");
-	scanf("%[^\n]%*c", &to_location);
-	printf("Departure time of bus:              ");
-	scanf("%[^\n]%*c", &departure_time);
-	printf("Arrival time of bus:                ");
-	scanf("%[^\n]%*c", &arrival_time);
-	printf("Rating of bus(?/5):                 ");
-	scanf("%f", &rating);
-	printf("Fare of bus:                        ");
-	scanf("%f", &fare);
-	printf("Total seats in bus:                 ");
-	scanf("%d", &total_seats);
-
-	sprintf(str, "insert into bus_details (bus_name,rating,total_seats) values ('%s',%0.1f,%d)", bus_name, rating, total_seats);
-	int check_query = mysql_query(conn, str);
-	// printf("Check query data %d",check_query);
-	sprintf(str, "select bus_id from bus_details where bus_name='%s'", bus_name);
+	while (1) {
+		printf("\n============  ENTER THE DETAILS TO ADD BUS  ============\n\n");
+		printf("Enter bus name:                     ");
+		int check1 = scanf("%[^\n]%*c", &bus_name);
+		printf("Souce location of bus:              ");
+		int check2 = scanf("%[^\n]%*c", &from_location);
+		printf("Destination location of bus:        ");
+		int check3 = scanf("%[^\n]%*c", &to_location);
+		printf("Departure time of bus:              ");
+		int check4 = scanf("%[^\n]%*c", &departure_time);
+		printf("Arrival time of bus:                ");
+		int check5 = scanf("%[^\n]%*c", &arrival_time);
+		printf("Rating of bus(?/5):                 ");
+		int check6 = scanf("%f", &rating);
+		printf("Fare of bus:                        ");
+		int check7 = scanf("%f", &fare);
+		printf("Total seats in bus:                 ");
+		int check8 = scanf("%d", &total_seats);
+		if (check1 == 1 && check2 == 1 && check3 == 1 && check4 == 1 && check5 == 1 && check6 == 1 && check7 == 1 && check8 == 1) //check if all the value is correct or not
+		{
+			break;
+		}
+		else {
+			printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+			printf("Please enter valid data !!!!\n\n");
+			// while (getchar() != '\n'); // clear input buffer
+			continue;
+		}
+	}
+// mysql_affected_rows
+	sprintf(str, "insert into bus_details (bus_name,owner_id,rating,total_seats) values ('%s',%d,%0.1f,%d)", bus_name, u_id ,rating, total_seats);
 	mysql_query(conn, str);
-	res = mysql_store_result(conn);   //stores the result of the query
-	int bus_id = atoi( mysql_fetch_row(res)[0]);  //atoi funcation is used to convert string pointer to integer
-	// printf("%d\n",bus_id);
-	sprintf(str, "insert into route_details (bus_id,from_location,to_location,departure_time,arrival_time,fare) values (%d,'%s','%s','%s','%s',%0.1f)", bus_id, from_location, to_location, departure_time, arrival_time, fare);
-	mysql_query(conn, str);
-	printf("\nBUS DETAILS HAS BEEN SUCESSFULLY ADDED\n");
+	if (mysql_affected_rows(conn)==1)
+	{
+		sprintf(str, "select bus_id from bus_details where bus_name='%s' and owner_id='%d' and rating='%0.1f' and total_seats=%d", bus_name, u_id, rating, total_seats);
+		mysql_query(conn, str);
+		res = mysql_store_result(conn);   //stores the result of the query
+		int bus_id = atoi( mysql_fetch_row(res)[0]);  //atoi funcation is used to convert string pointer to integer
+		sprintf(str, "insert into route_details (bus_id,from_location,to_location,departure_time,arrival_time,fare) values (%d,'%s','%s','%s','%s',%0.1f)", bus_id, from_location, to_location, departure_time, arrival_time, fare);
+		mysql_query(conn, str);		
+		if (mysql_affected_rows(conn)==1)
+		{
+			printf("\nBUS DETAILS HAS BEEN SUCESSFULLY ADDED\n");
+		}	
+		else printf("Unable to add bus !!!!!!!!!\n");
+		
+	}
+	else{
+		printf("Unable to add bus !!!!!!!!!\n");
+	}
 	return 0;
 }
+
 void mysql_booking_data_printer(char str[300]) {
 	/* this function will fetch the result from mysql database and prints it beautifully on screen */
 	mysql_query(conn, str);
@@ -830,9 +852,9 @@ int main(int argc, char const *argv[])
 	// printf("%d\n", uid_status);
 	// signup(); //started signup module if the user wants to register into the software
 
-	seat_availability(uid_status);
+	// seat_availability(uid_status);
 
-	// add_bus(uid_status);
+	add_bus(uid_status);
 
 	// manage_booking(uid_status);
 
