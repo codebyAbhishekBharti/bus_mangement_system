@@ -841,7 +841,7 @@ int change_bus_details(int u_id) {
 int change_permission(int u_id) {
 	/* this function is responsible to change the permission of different users */
 	int id = 0; //stoes id of users to change the permission levels
-	int query[50]; //stores mysql command
+	char query[100]; //stores mysql command
 	int permission_level = 0;  //stores the permission level to set for the user
 	while (1) {  //entering the while loop to handle the error
 		printf("\nEnter the user id you want to change the permission level: ");
