@@ -143,7 +143,7 @@ void seat_availability(int u_id) {
 	int* bus_id_array = (int*) malloc(default_size * sizeof(default_size)); // Allocate initial memory for array to store bus id
 	int* route_id_array = (int*) malloc(default_size * sizeof(default_size)); // Allocate initial memory for array to store route id
 	char command;  //stores if the user wants to book the ticket or not
-	while (1){
+	while (1) {
 		printf("Enter the journey date (dd-mm-yyyy):- ");
 		int check1 = scanf("%02d-%02d-%04d", &day, &month, &year);
 		while (getchar() != '\n'); //clearing input buffer
@@ -260,20 +260,28 @@ int add_bus(int u_id)
 		printf("\n============  ENTER THE DETAILS TO ADD BUS  ============\n\n");
 		printf("Enter bus name:                     ");
 		int check1 = scanf("%[^\n]%*c", &bus_name);
+		fflush(stdin);
 		printf("Souce location of bus:              ");
 		int check2 = scanf("%[^\n]%*c", &from_location);
+		fflush(stdin);
 		printf("Destination location of bus:        ");
 		int check3 = scanf("%[^\n]%*c", &to_location);
-		printf("Departure time of bus:              ");
+		fflush(stdin);
+		printf("Departure time of bus (HH:MM):              ");
 		int check4 = scanf("%[^\n]%*c", &departure_time);
-		printf("Arrival time of bus:                ");
+		fflush(stdin);
+		printf("Arrival time of bus (HH:MM):                ");
 		int check5 = scanf("%[^\n]%*c", &arrival_time);
+		fflush(stdin);
 		printf("Rating of bus(?/5):                 ");
 		int check6 = scanf("%f", &rating);
+		fflush(stdin);
 		printf("Fare of bus:                        ");
 		int check7 = scanf("%f", &fare);
+		fflush(stdin);
 		printf("Total seats in bus:                 ");
 		int check8 = scanf("%d", &total_seats);
+		fflush(stdin);
 		if (check1 == 1 && check2 == 1 && check3 == 1 && check4 == 1 && check5 == 1 && check6 == 1 && check7 == 1 && check8 == 1) //check if all the value is correct or not
 		{
 			break;
@@ -286,24 +294,24 @@ int add_bus(int u_id)
 		}
 	}
 // mysql_affected_rows
-	sprintf(str, "insert into bus_details (bus_name,owner_id,rating,total_seats) values ('%s',%d,%0.1f,%d)", bus_name, u_id ,rating, total_seats);
+	sprintf(str, "insert into bus_details (bus_name,owner_id,rating,total_seats) values ('%s',%d,%0.1f,%d)", bus_name, u_id , rating, total_seats);
 	mysql_query(conn, str);
-	if (mysql_affected_rows(conn)==1)
+	if (mysql_affected_rows(conn) == 1)
 	{
 		sprintf(str, "select bus_id from bus_details where bus_name='%s' and owner_id='%d' and rating='%0.1f' and total_seats=%d", bus_name, u_id, rating, total_seats);
 		mysql_query(conn, str);
 		res = mysql_store_result(conn);   //stores the result of the query
 		int bus_id = atoi( mysql_fetch_row(res)[0]);  //atoi funcation is used to convert string pointer to integer
 		sprintf(str, "insert into route_details (bus_id,from_location,to_location,departure_time,arrival_time,fare) values (%d,'%s','%s','%s','%s',%0.1f)", bus_id, from_location, to_location, departure_time, arrival_time, fare);
-		mysql_query(conn, str);		
-		if (mysql_affected_rows(conn)==1)
+		mysql_query(conn, str);
+		if (mysql_affected_rows(conn) == 1)
 		{
 			printf("\nBUS DETAILS HAS BEEN SUCESSFULLY ADDED\n");
-		}	
+		}
 		else printf("Unable to add bus !!!!!!!!!\n");
-		
+
 	}
-	else{
+	else {
 		printf("Unable to add bus !!!!!!!!!\n");
 	}
 	return 0;
@@ -830,7 +838,58 @@ int change_bus_details(int u_id) {
 	}
 	return 0;
 }
-
+int change_permission(int u_id) {
+	/* this function is responsible to change the permission of different users */
+	int id = 0; //stoes id of users to change the permission levels
+	int query[50]; //stores mysql command
+	int permission_level = 0;  //stores the permission level to set for the user
+	while (1) {  //entering the while loop to handle the error
+		printf("\nEnter the user id you want to change the permission level: ");
+		if (scanf("%d", &id) == 1)  //checking for only integer input by the user
+		{
+			//below sql command checks if there is present in the database with the id given as an input
+			sprintf(query, "select count(u_id) from users where u_id=%d", id);
+			mysql_query(conn, query); //executing sql command
+			res = mysql_store_result(conn); //storing the result of sql
+			row = mysql_fetch_row(res); //getting the first row of sql
+			if (atoi(row[0]) == 1) //checking if there is user or not with the user id given in input
+			{
+				while (1) { //starting loop to handle errors
+					printf("Enter the permssion level for the user:- \n");
+					printf("Level 1 : Normal User\n");
+					printf("Level 2 : Bus Owner\n");
+					printf("Level 3 : Administrator\n");
+					printf("Enter 99 to exit\n");
+					printf("Enter the permission level in numeric value: ");
+					if (scanf("%d", &permission_level) == 1 && permission_level > 0 && (permission_level < 4 || permission_level == 99)) //checking conditions to verify if the users has given the right permssion level to enter
+					{
+						if (permission_level == 99)  //if user enters 99 get out of permssion change module
+						{
+							printf("Aborted permission change\n");
+							break;
+						}
+						//below sql command updates the persmssion of the u_id given by the user
+						sprintf(query, "update users set permission=%d where u_id=%d", permission_level, id);
+						mysql_query(conn, query); //executing sql command 
+						int check = mysql_affected_rows(conn); //getting total affected row in the db to check if the effect was successful or not
+						if (check == 1) printf("Permission changed successfully !!!!!!!!!\n"); //checking for successfull effect
+						else printf("Failed to change permission !!!!!!!!\n"); //printing if changes get failed
+						break;						
+					}
+					while (getchar() != '\n'); // clear input buffer
+					printf("\nPlease enter valid input !!!!!");
+				}
+				break;
+			}
+			else {
+				printf("Invalid user id !!!!!!!!\n");
+				continue;
+			}
+		}
+		while (getchar() != '\n'); // clear input buffer
+		printf("\nPlease enter valid input !!!!!");
+	}
+}
 int main(int argc, char const *argv[])
 {
 	conn = mysql_init(NULL);
@@ -854,13 +913,15 @@ int main(int argc, char const *argv[])
 
 	// seat_availability(uid_status);
 
-	add_bus(uid_status);
+	// add_bus(uid_status);
 
 	// manage_booking(uid_status);
 
 	// cancel_seat(uid_status);
 
 	// change_bus_details(uid_status);
+
+	change_permission(uid_status);
 
 	return 0;
 }
