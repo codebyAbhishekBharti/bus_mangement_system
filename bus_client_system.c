@@ -537,7 +537,7 @@ int login(char username[], char password[]) {
 
 }
 
-int count_int_length(num){
+int count_int_length(int num){
 	/* this function returns total length of integer passed */
 	int count=0;
 	while(num!=0){
