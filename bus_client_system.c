@@ -263,6 +263,10 @@ int add_bus(int u_id)
 	do {
 		printf("Enter bus name:                             ");
 		fgets(bus_name, buff_size, stdin);   //taking bus name input
+		if (bus_name[strcspn(bus_name, "\n")]!= '\n'){ //checking if user has entered more character than buffer size
+			while (getchar() != '\n'); // clear input buffer
+			continue;
+		}		
 		bus_name[strcspn(bus_name, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
 		if (bus_name[0] != '\0') check = 1; // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
@@ -273,6 +277,10 @@ int add_bus(int u_id)
 	do {
 		printf("Source location of bus:                     ");
 		fgets(from_location, buff_size, stdin);  //taking source location from the user
+		if (from_location[strcspn(from_location, "\n")]!= '\n'){ //checking if user has entered more character than buffer size
+			while (getchar() != '\n'); // clear input buffer
+			continue;
+		}		
 		from_location[strcspn(from_location, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
 		if (from_location[0] != '\0') check = 1;  // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
@@ -283,6 +291,10 @@ int add_bus(int u_id)
 	do {
 		printf("Destination location of bus:                ");
 		fgets(to_location, buff_size, stdin); //taking final location from the user
+		if (to_location[strcspn(to_location, "\n")]!= '\n'){ //checking if user has entered more character than buffer size
+			while (getchar() != '\n'); // clear input buffer
+			continue;
+		}		
 		to_location[strcspn(to_location, "\n")] = '\0'; //setting the last value of character for termination and dealing with buffer over flow
 		if (to_location[0] != '\0') check = 1;   // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
