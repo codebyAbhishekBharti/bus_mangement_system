@@ -548,6 +548,10 @@ int signup() {
 	do {
 		printf("Enter your name:                    ");
 		fgets(name, buff_size, stdin);   //taking name input
+		if (name[strcspn(name, "\n")]!= '\n'){
+			while (getchar() != '\n'); // clear input buffer
+			continue;
+		}
 		name[strcspn(name, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
 		if (name[0] != '\0') check = 1; // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
@@ -558,6 +562,10 @@ int signup() {
 	do {
 		printf("Enter username you want to create:  ");
 		fgets(user_name, buff_size, stdin);   //taking user name input
+		if (user_name[strcspn(user_name, "\n")]!= '\n'){
+			while (getchar() != '\n'); // clear input buffer
+			continue;
+		}		
 		user_name[strcspn(user_name, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
 		if (user_name[0] != '\0') check = 1; // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
@@ -568,6 +576,10 @@ int signup() {
 	do {
 		printf("Enter email address:                ");
 		fgets(email, buff_size, stdin);   //taking email input
+		if (email[strcspn(email, "\n")]!= '\n'){
+			while (getchar() != '\n'); // clear input buffer
+			continue;
+		}		
 		email[strcspn(email, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
 		if (email[0] != '\0') check = 1; // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
@@ -578,6 +590,10 @@ int signup() {
 	do {
 		printf("Enter password:                     ");
 		fgets(password, buff_size, stdin);   //taking password input
+		if (password[strcspn(password, "\n")]!= '\n'){
+			while (getchar() != '\n'); // clear input buffer
+			continue;
+		}		
 		password[strcspn(password, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
 		if (password[0] != '\0') check = 1; // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
