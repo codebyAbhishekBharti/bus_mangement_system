@@ -251,69 +251,122 @@ void seat_availability(int u_id) {
 
 int add_bus(int u_id)
 {
-	char str[200];
-	char bus_name[50] = "Dharam Rath", from_location[50] = "Amritsar", to_location[50] = "Jalandhar", departure_time[6] = "08:00", arrival_time[6] = "08:30";
-	float rating = 5, fare = 40;
-	int total_seats = 20;
+	char query[200]; //stores sql query
+	char bus_name[50] = "Dharam Rath", from_location[50] = "Amritsar", to_location[50] = "Jalandhar", departure_time[6] = "08:00", arrival_time[6] = "08:30"; //stores different information to add bus to the db
+	float rating = 5, fare = 40; //stores the rating and fare information
+	int total_seats = 20; //stores total seats
+	int check; //checks for right input entered by the user
+	int buff_size = 50; //setting the size of buffer to the length of string to be entered by the user
 
-	while (1) {
-		printf("\n============  ENTER THE DETAILS TO ADD BUS  ============\n\n");
-		printf("Enter bus name:                     ");
-		int check1 = scanf("%[^\n]%*c", &bus_name);
-		fflush(stdin);
-		printf("Souce location of bus:              ");
-		int check2 = scanf("%[^\n]%*c", &from_location);
-		fflush(stdin);
-		printf("Destination location of bus:        ");
-		int check3 = scanf("%[^\n]%*c", &to_location);
-		fflush(stdin);
+	printf("\n============  ENTER THE DETAILS TO ADD BUS  ============\n\n");
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		printf("Enter bus name:                             ");
+		fgets(bus_name, buff_size, stdin);   //taking bus name input
+		bus_name[strcspn(bus_name, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
+		if (bus_name[0] != '\0') check = 1; // if value is correct than getting out of loop
+		else printf("\nPlease enter valid input !!!!!\n");
+	}
+	while (!check);
+
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		printf("Source location of bus:                     ");
+		fgets(from_location, buff_size, stdin);  //taking source location from the user
+		from_location[strcspn(from_location, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
+		if (from_location[0] != '\0') check = 1;  // if value is correct than getting out of loop
+		else printf("\nPlease enter valid input !!!!!\n");
+	}
+	while (!check);
+
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		printf("Destination location of bus:                ");
+		fgets(to_location, buff_size, stdin); //taking final location from the user
+		to_location[strcspn(to_location, "\n")] = '\0'; //setting the last value of character for termination and dealing with buffer over flow
+		if (to_location[0] != '\0') check = 1;   // if value is correct than getting out of loop
+		else printf("\nPlease enter valid input !!!!!\n");
+	}
+	while (!check);
+
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		int hour, min; //stores hour and min data
 		printf("Departure time of bus (HH:MM):              ");
-		int check4 = scanf("%[^\n]%*c", &departure_time);
-		fflush(stdin);
-		printf("Arrival time of bus (HH:MM):                ");
-		int check5 = scanf("%[^\n]%*c", &arrival_time);
-		fflush(stdin);
-		printf("Rating of bus(?/5):                 ");
-		int check6 = scanf("%f", &rating);
-		fflush(stdin);
-		printf("Fare of bus:                        ");
-		int check7 = scanf("%f", &fare);
-		fflush(stdin);
-		printf("Total seats in bus:                 ");
-		int check8 = scanf("%d", &total_seats);
-		fflush(stdin);
-		if (check1 == 1 && check2 == 1 && check3 == 1 && check4 == 1 && check5 == 1 && check6 == 1 && check7 == 1 && check8 == 1) //check if all the value is correct or not
+		if (scanf("%02d:%02d", &hour, &min) == 2 && hour < 24 && hour >= 0 && min < 60 && min >= 0)  //taking input of time at the same time checking if the time entered by the user is correct or not
 		{
-			break;
+			sprintf(departure_time, "%02d:%02d:00", hour, min);   //concatenating the value of hour and min in departure time
+			check = 1; //getting out of loop
 		}
+		while (getchar() != '\n'); // clear input buffer
+		printf("Please enter valid input !!!!!\n");
+	}
+	while (!check);
+
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		int hour, min; //stores hour and min data
+		printf("Arrival time of bus (HH:MM):                ");
+		if (scanf("%02d:%02d", &hour, &min) == 2 && hour < 24 && hour >= 0 && min < 60 && min >= 0)  //taking input of time at the same time checking if the time entered by the user is correct or not
+		{
+			sprintf(arrival_time, "%02d:%02d:00", hour, min);   //concatenating the value of hour and min in arrival time
+			check = 1; //getting out of loop
+		}
+		while (getchar() != '\n'); // clear input buffer
+		printf("Please enter valid input !!!!!\n");
+	}
+	while (!check);
+
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		printf("Rating of bus(?/5):                 ");
+		if (scanf("%f", &rating) == 1 && rating > 0 && 5 >= rating) check = 1;  //taking input from the user at the same checking if the value are valid or not
 		else {
-			printf("\e[1;1H\e[2J");    //this will clear the terminal screen
-			printf("Please enter valid data !!!!\n\n");
-			// while (getchar() != '\n'); // clear input buffer
-			continue;
+			while (getchar() != '\n'); // clear input buffer
+			printf("Please enter valid input !!!!!\n");
 		}
 	}
-// mysql_affected_rows
-	sprintf(str, "insert into bus_details (bus_name,owner_id,rating,total_seats) values ('%s',%d,%0.1f,%d)", bus_name, u_id , rating, total_seats);
-	mysql_query(conn, str);
-	if (mysql_affected_rows(conn) == 1)
+	while (!check);
+
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		printf("Fare of bus:                        ");
+		if (scanf("%f", &fare) == 1  && fare > 0) check = 1;  //taking input from the user at the same checking if the value are valid or not
+		else {
+			while (getchar() != '\n'); // clear input buffer
+			printf("Please enter valid input !!!!!\n");
+		}
+	}
+	while (!check);
+
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		printf("Total seats in bus:                 ");
+		if (scanf("%d", &total_seats) == 1 && total_seats > 0) check = 1;  //taking total seat input from the user and at the same time checking if the value or in range or not
+		else {
+			while (getchar() != '\n'); // clear input buffer
+			printf("Please enter valid input !!!!!\n");
+		}
+	}
+	while (!check);
+
+	//below sql command inserts the details to the bus_details table
+	sprintf(query, "insert into bus_details (bus_name,owner_id,rating,total_seats) values ('%s',%d,%0.1f,%d)", bus_name, u_id , rating, total_seats);
+	mysql_query(conn, query);  //executing sql query
+	if (mysql_affected_rows(conn) == 1) //checking if insertion is successfull or not
 	{
-		sprintf(str, "select bus_id from bus_details where bus_name='%s' and owner_id='%d' and rating='%0.1f' and total_seats=%d", bus_name, u_id, rating, total_seats);
-		mysql_query(conn, str);
+		//below sql query gets the bus id of the bus which is just inserted in db
+		sprintf(query, "select bus_id from bus_details where bus_name='%s' and owner_id='%d' and rating='%0.1f' and total_seats=%d", bus_name, u_id, rating, total_seats);
+		mysql_query(conn, query); //executing sql command
 		res = mysql_store_result(conn);   //stores the result of the query
 		int bus_id = atoi( mysql_fetch_row(res)[0]);  //atoi funcation is used to convert string pointer to integer
-		sprintf(str, "insert into route_details (bus_id,from_location,to_location,departure_time,arrival_time,fare) values (%d,'%s','%s','%s','%s',%0.1f)", bus_id, from_location, to_location, departure_time, arrival_time, fare);
-		mysql_query(conn, str);
-		if (mysql_affected_rows(conn) == 1)
-		{
-			printf("\nBUS DETAILS HAS BEEN SUCESSFULLY ADDED\n");
-		}
+		//below sql query inserts the route details to route_details table of the database
+		sprintf(query, "insert into route_details (bus_id,from_location,to_location,departure_time,arrival_time,fare) values (%d,'%s','%s','%s','%s',%0.1f)", bus_id, from_location, to_location, departure_time, arrival_time, fare);
+		mysql_query(conn, query); //executing sql query
+		if (mysql_affected_rows(conn) == 1) printf("\n---------  BUS DETAILS HAS BEEN SUCESSFULLY ADDED  ---------\n");
 		else printf("Unable to add bus !!!!!!!!!\n");
-
 	}
-	else {
-		printf("Unable to add bus !!!!!!!!!\n");
-	}
+	else printf("Unable to add bus !!!!!!!!!\n");
 	return 0;
 }
 
@@ -870,11 +923,11 @@ int change_permission(int u_id) {
 						}
 						//below sql command updates the persmssion of the u_id given by the user
 						sprintf(query, "update users set permission=%d where u_id=%d", permission_level, id);
-						mysql_query(conn, query); //executing sql command 
+						mysql_query(conn, query); //executing sql command
 						int check = mysql_affected_rows(conn); //getting total affected row in the db to check if the effect was successful or not
 						if (check == 1) printf("Permission changed successfully !!!!!!!!!\n"); //checking for successfull effect
 						else printf("Failed to change permission !!!!!!!!\n"); //printing if changes get failed
-						break;						
+						break;
 					}
 					while (getchar() != '\n'); // clear input buffer
 					printf("\nPlease enter valid input !!!!!");
@@ -913,7 +966,7 @@ int main(int argc, char const *argv[])
 
 	// seat_availability(uid_status);
 
-	// add_bus(uid_status);
+	add_bus(uid_status);
 
 	// manage_booking(uid_status);
 
@@ -921,7 +974,7 @@ int main(int argc, char const *argv[])
 
 	// change_bus_details(uid_status);
 
-	change_permission(uid_status);
+	// change_permission(uid_status);
 
 	return 0;
 }
