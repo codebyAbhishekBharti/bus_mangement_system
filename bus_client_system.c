@@ -525,37 +525,87 @@ int login(char username[], char password[]) {
 
 }
 
+int count_int_length(num){
+	/* this function returns total length of integer passed */
+	int count=0;
+	while(num!=0){
+		num/=10;
+		count++;
+	}
+	return count;
+}
+
 int signup() {
 	/* this function will will the user to sign up
 	data will be stored in users table of the database */
 	char str[200]; //stores the mysql command to execute
 	char name[100] = "Subhadeep Kumar", user_name[50] = "Abhishek", email[50] = "subhadeep@gmail.com", password[250] = "subhadeep"; //initiating different variable to store the data in databse
-	int age = 18, mob = 1234567890;
-	while (1) {
-		//storing the data in variables
-		//check variable will store the data if correct data is inverted in variable or not
-		printf("\nEnter your name:                    ");
-		int check1 = scanf("%[^\n]%*c", &name);
-		printf("Enter username you want to create:  ");
-		int check2 = scanf("%[^\n]%*c", &user_name);
-		printf("Enter email address:                ");
-		int check3 = scanf("%[^\n]%*c", &email);
-		printf("Enter password:                     ");
-		int check4 = scanf("%[^\n]%*c", &password);
-		printf("Enter your age:                     ");
-		int check5 = scanf("%d", &age);
-		printf("Enter mobile number:                ");
-		int check6 = scanf("%d", &mob);
+	int age = 18, mob = 1234567890;  //stores age and mobile no of the user
+	int check; //stoes value to check if right value is entered
+	int buff_size=50; //default buffer length for fixing the length to be entered by the user
 
-		if (check1 == 1 && check2 == 1 && check3 == 1 && check4 == 1 && check5 == 1 && check6 == 1) //check if all the inputs are correct or not
-			break;
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		printf("Enter your name:                    ");
+		fgets(name, buff_size, stdin);   //taking name input
+		name[strcspn(name, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
+		if (name[0] != '\0') check = 1; // if value is correct than getting out of loop
+		else printf("\nPlease enter valid input !!!!!\n");
+	}
+	while (!check);	
+
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		printf("Enter username you want to create:  ");
+		fgets(user_name, buff_size, stdin);   //taking user name input
+		user_name[strcspn(user_name, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
+		if (user_name[0] != '\0') check = 1; // if value is correct than getting out of loop
+		else printf("\nPlease enter valid input !!!!!\n");
+	}
+	while (!check);	
+
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		printf("Enter email address:                ");
+		fgets(email, buff_size, stdin);   //taking email input
+		email[strcspn(email, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
+		if (email[0] != '\0') check = 1; // if value is correct than getting out of loop
+		else printf("\nPlease enter valid input !!!!!\n");
+	}
+	while (!check);
+
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		printf("Enter password:                     ");
+		fgets(password, buff_size, stdin);   //taking password input
+		password[strcspn(password, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
+		if (password[0] != '\0') check = 1; // if value is correct than getting out of loop
+		else printf("\nPlease enter valid input !!!!!\n");
+	}
+	while (!check);	
+
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		printf("Enter your age:                     ");
+		if (scanf("%d", &age) == 1 && age > 0) check = 1;  //taking age input from the user and checking if the value or in range or not
 		else {
-			printf("\e[1;1H\e[2J");    //this will clear the terminal screen
-			printf("Please enter valid data !!!!\n");
 			while (getchar() != '\n'); // clear input buffer
-			continue;
+			printf("Please enter valid input !!!!!\n");
 		}
 	}
+	while (!check);
+
+	check = 0; //Initializing to check for right value entered by ther user
+	do {
+		printf("Enter mobile number:                ");
+		if (scanf("%d", &mob) == 1 && count_int_length(mob)==10) check = 1;  //taking mobile no input from the user and checking if mob no is of 10 digit or not
+		else {
+			while (getchar() != '\n'); // clear input buffer
+			printf("Please enter valid input !!!!!\n");
+		}
+	}
+	while (!check);
+
 	while (getchar() != '\n'); // clear input buffer
 	while (1) {
 		//running while loop to check the user name is valid or not if not valid then it will retake the input from user
@@ -962,11 +1012,11 @@ int main(int argc, char const *argv[])
 
 	int uid_status = login("Abhishek", "abhishek");  //sending userid or password to login function to get user id if successful login or 0
 	// printf("%d\n", uid_status);
-	// signup(); //started signup module if the user wants to register into the software
+	signup(); //started signup module if the user wants to register into the software
 
 	// seat_availability(uid_status);
 
-	add_bus(uid_status);
+	// add_bus(uid_status);
 
 	// manage_booking(uid_status);
 
