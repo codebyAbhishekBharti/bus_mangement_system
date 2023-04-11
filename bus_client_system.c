@@ -263,10 +263,10 @@ int add_bus(int u_id)
 	do {
 		printf("Enter bus name:                             ");
 		fgets(bus_name, buff_size, stdin);   //taking bus name input
-		if (bus_name[strcspn(bus_name, "\n")]!= '\n'){ //checking if user has entered more character than buffer size
+		if (bus_name[strcspn(bus_name, "\n")] != '\n') { //checking if user has entered more character than buffer size
 			while (getchar() != '\n'); // clear input buffer
 			continue;
-		}		
+		}
 		bus_name[strcspn(bus_name, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
 		if (bus_name[0] != '\0') check = 1; // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
@@ -277,10 +277,10 @@ int add_bus(int u_id)
 	do {
 		printf("Source location of bus:                     ");
 		fgets(from_location, buff_size, stdin);  //taking source location from the user
-		if (from_location[strcspn(from_location, "\n")]!= '\n'){ //checking if user has entered more character than buffer size
+		if (from_location[strcspn(from_location, "\n")] != '\n') { //checking if user has entered more character than buffer size
 			while (getchar() != '\n'); // clear input buffer
 			continue;
-		}		
+		}
 		from_location[strcspn(from_location, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
 		if (from_location[0] != '\0') check = 1;  // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
@@ -291,10 +291,10 @@ int add_bus(int u_id)
 	do {
 		printf("Destination location of bus:                ");
 		fgets(to_location, buff_size, stdin); //taking final location from the user
-		if (to_location[strcspn(to_location, "\n")]!= '\n'){ //checking if user has entered more character than buffer size
+		if (to_location[strcspn(to_location, "\n")] != '\n') { //checking if user has entered more character than buffer size
 			while (getchar() != '\n'); // clear input buffer
 			continue;
-		}		
+		}
 		to_location[strcspn(to_location, "\n")] = '\0'; //setting the last value of character for termination and dealing with buffer over flow
 		if (to_location[0] != '\0') check = 1;   // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
@@ -537,11 +537,11 @@ int login(char username[], char password[]) {
 
 }
 
-int count_int_length(int num){
+int count_int_length(int num) {
 	/* this function returns total length of integer passed */
-	int count=0;
-	while(num!=0){
-		num/=10;
+	int count = 0;
+	while (num != 0) {
+		num /= 10;
 		count++;
 	}
 	return count;
@@ -554,13 +554,13 @@ int signup() {
 	char name[100] = "Subhadeep Kumar", user_name[50] = "Abhishek", email[50] = "subhadeep@gmail.com", password[250] = "subhadeep"; //initiating different variable to store the data in databse
 	int age = 18, mob = 1234567890;  //stores age and mobile no of the user
 	int check; //stoes value to check if right value is entered
-	int buff_size=50; //default buffer length for fixing the length to be entered by the user
+	int buff_size = 50; //default buffer length for fixing the length to be entered by the user
 
 	check = 0; //Initializing to check for right value entered by ther user
 	do {
 		printf("Enter your name:                    ");
 		fgets(name, buff_size, stdin);   //taking name input
-		if (name[strcspn(name, "\n")]!= '\n'){
+		if (name[strcspn(name, "\n")] != '\n') {
 			while (getchar() != '\n'); // clear input buffer
 			continue;
 		}
@@ -568,30 +568,30 @@ int signup() {
 		if (name[0] != '\0') check = 1; // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
 	}
-	while (!check);	
+	while (!check);
 
 	check = 0; //Initializing to check for right value entered by ther user
 	do {
 		printf("Enter username you want to create:  ");
 		fgets(user_name, buff_size, stdin);   //taking user name input
-		if (user_name[strcspn(user_name, "\n")]!= '\n'){
+		if (user_name[strcspn(user_name, "\n")] != '\n') {
 			while (getchar() != '\n'); // clear input buffer
 			continue;
-		}		
+		}
 		user_name[strcspn(user_name, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
 		if (user_name[0] != '\0') check = 1; // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
 	}
-	while (!check);	
+	while (!check);
 
 	check = 0; //Initializing to check for right value entered by ther user
 	do {
 		printf("Enter email address:                ");
 		fgets(email, buff_size, stdin);   //taking email input
-		if (email[strcspn(email, "\n")]!= '\n'){
+		if (email[strcspn(email, "\n")] != '\n') {
 			while (getchar() != '\n'); // clear input buffer
 			continue;
-		}		
+		}
 		email[strcspn(email, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
 		if (email[0] != '\0') check = 1; // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
@@ -602,15 +602,15 @@ int signup() {
 	do {
 		printf("Enter password:                     ");
 		fgets(password, buff_size, stdin);   //taking password input
-		if (password[strcspn(password, "\n")]!= '\n'){
+		if (password[strcspn(password, "\n")] != '\n') {
 			while (getchar() != '\n'); // clear input buffer
 			continue;
-		}		
+		}
 		password[strcspn(password, "\n")] = '\0';  //setting the last value of character for termination and dealing with buffer over flow
 		if (password[0] != '\0') check = 1; // if value is correct than getting out of loop
 		else printf("\nPlease enter valid input !!!!!\n");
 	}
-	while (!check);	
+	while (!check);
 
 	check = 0; //Initializing to check for right value entered by ther user
 	do {
@@ -626,7 +626,7 @@ int signup() {
 	check = 0; //Initializing to check for right value entered by ther user
 	do {
 		printf("Enter mobile number:                ");
-		if (scanf("%d", &mob) == 1 && count_int_length(mob)==10) check = 1;  //taking mobile no input from the user and checking if mob no is of 10 digit or not
+		if (scanf("%d", &mob) == 1 && count_int_length(mob) == 10) check = 1; //taking mobile no input from the user and checking if mob no is of 10 digit or not
 		else {
 			while (getchar() != '\n'); // clear input buffer
 			printf("Please enter valid input !!!!!\n");
@@ -655,7 +655,8 @@ int signup() {
 	sprintf(str, "insert into users (name,user_name,age,email,mob,password) values ('%s','%s',%d,'%s',%d,'%s')", name, user_name, age, email, mob, password); //storing sql command to create new user
 	// printf("%s\n", str);
 	mysql_query(conn, str); //executes mysql query
-	printf("\n\n----- Account has been Successfully created !!!!! -----\n");
+	printf("\e[1;1H\e[2J"); //clearing the terminal screen
+	printf("\n\n                      ----- Account has been Successfully created !!!!! -----\n");
 	return 0;
 }
 
@@ -1021,6 +1022,139 @@ int change_permission(int u_id) {
 		printf("\nPlease enter valid input !!!!!");
 	}
 }
+int check_permission_level(int u_id) {
+	/* This funcation returns the permission level of the user */
+	char query[50];  //stores sql query to execute
+	//below sql query gets the permission level of user
+	sprintf(query, "select permission from users where u_id=%d", u_id);
+	mysql_query(conn, query); //executing sql command
+	res = mysql_store_result(conn); //storing the result of sql
+	row = mysql_fetch_row(res); //geting the row from the sql
+	return atoi(row[0]); //returning the value in the form of integer
+}
+void welcome() {
+	/* this will be displayed when user just opens the application */
+	printf("==================================================================================================\n");
+	printf("======                     WELCOME TO ELECTRIC BUS TICKET GENERATOR                         ======\n");
+	printf("==================================================================================================\n");
+	printf("*********************************************************************************\n");
+	printf("**                               **                                            **\n");
+	printf("**  -------------------------    **         ---------------------------------  **\n");
+	printf("**  -  Already a member   -      **         -   Don't have a account yet?   -  **\n");
+	printf("**  - Press 1 for 'Login' -      **         - Press 2 to 'Create a account' -  **\n");
+	printf("**  -------------------------    **           -------------------------------  **\n");
+	printf("**                               **                                            **\n");
+	printf("*********************************************************************************\n");
+	printf("\n\n\n           *****************************\n");
+	printf("           ***  Press 'q' for Exit   ***\n");
+	printf("           *****************************\n");
+}
+int login_signup_page_control() {
+	while (1) {
+		char choice[2];         //Creating string for user input
+		printf("\nEnter your Choice: ");
+		scanf("%s", &choice);      //taking input from user for Login create account or Quit
+
+		char valid1[] = "1";        //Declaring String for Login
+		char valid2[] = "2";        //Declaring String for Create account
+		char valid3[] = "q";        //String for Quit
+		if (strcmp(valid1, choice) == 0 )           //Comparision for Login
+		{
+			printf("\e[1;1H\e[2J");
+			char u_id[50], password[50];
+			printf("Enter your user id: ");
+			scanf("%s", &u_id);
+			printf("Enter your password: ");
+			scanf("%s", &password);
+			int uid_status = login(u_id, password);
+			if (uid_status == 0)
+			{
+				printf("\e[1;1H\e[2J");                 //clearing terminal screen
+				printf("\n!!!!!! You have entered wrong username/password !!!!!!!");
+				welcome();                              //calling welcome function
+				continue;
+			}
+			else return uid_status;                         //calling login function
+		}
+		else if (strcmp(valid2, choice) == 0)       //Comaprision for Create Account
+		{
+			printf("\e[1;1H\e[2J");
+			getchar();                              //to remove input buffer
+			signup();                               //calling signup function
+			welcome();                              //calling welcome function
+		}
+		else if (strcmp(valid3, choice) == 0)       //Comparision for Quit statement
+		{
+			printf("\e[1;1H\e[2J");
+			printf("                    ****************************\n");
+			printf("                    ****      Visit Again    ***\n");
+			printf("                    ****       Take Care     ***\n");
+			printf("                    ****************************\n");
+			exit(0);
+		}
+		else                                      // If other than 1 or 2 or Q pressed
+		{
+			printf("                                  Invalid Input.          \n");
+		}
+	}
+}
+void homepage(int u_id,int permission_level) {
+	printf("\e[1;1H\e[2J");                 //clearing terminal screen
+	while (1) {
+		printf("==================================================================================================\n");
+		printf("======                     WELCOME TO ELECTRIC BUS TICKET GENERATOR                         ======\n");
+		printf("==================================================================================================\n");
+		printf("\n\n\n");
+		printf("            [1.] Book Ticket                                          [2.] Cancel Ticket \n");
+		printf("            [3.] Seat Availabiliy                                     [4.] Manage booking\n");
+		if (permission_level == 1)  printf("            [99.] Exit.\n");
+		else
+		{
+			printf("            [5.] Add Bus                                              [6.] Change Bus Details.      \n");
+			printf("            [7.] Change permission level.                             [99.] Exit.\n\n");
+		}
+		int command;
+		printf("\n       Enter Choice: ");
+		if (scanf("%d", &command) == 1 && (((permission_level == 1 && command < 5) || (permission_level != 1 && command < 8)) && command > 0|| command==99) )
+		{
+			switch (command){
+			case 1:
+				seat_availability(u_id);
+				break;
+			case 2:
+				cancel_seat(u_id);
+				break;
+			case 3:
+				seat_availability(u_id);
+				break;
+			case 4:
+				manage_booking(u_id);
+				break;
+			case 5:
+				add_bus(u_id);
+				break;
+			case 6:
+				change_bus_details(u_id);
+				break;
+			case 7:
+				change_permission(u_id);
+				break;
+			case 99:
+				printf("\n    --------- Exiting Program --------------\n");
+				exit(0);
+			}
+			// break;
+		}
+		else {
+			printf("\e[1;1H\e[2J");                 //clearing terminal screen
+			printf("                       ----------------   Invalid Input.   ----------------       \n");
+			while (getchar() != '\n'); // clear input buffer
+			continue;
+		};
+		
+	}
+
+}
 int main(int argc, char const *argv[])
 {
 	conn = mysql_init(NULL);
@@ -1040,7 +1174,7 @@ int main(int argc, char const *argv[])
 
 	int uid_status = login("Abhishek", "abhishek");  //sending userid or password to login function to get user id if successful login or 0
 	// printf("%d\n", uid_status);
-	signup(); //started signup module if the user wants to register into the software
+	// signup(); //started signup module if the user wants to register into the software
 
 	// seat_availability(uid_status);
 
@@ -1053,6 +1187,13 @@ int main(int argc, char const *argv[])
 	// change_bus_details(uid_status);
 
 	// change_permission(uid_status);
+
+	welcome();
+	int u_id = login_signup_page_control() ;
+	// printf("%d\n",response );
+	int permission_level = check_permission_level(u_id);
+	homepage(u_id,permission_level);
+	// printf("%d\n",permission_level );
 
 	return 0;
 }
