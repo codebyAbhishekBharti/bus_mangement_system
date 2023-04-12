@@ -280,8 +280,10 @@ int add_bus(int u_id)
 	int total_seats = 20; //stores total seats
 	int check; //checks for right input entered by the user
 	int buff_size = 50; //setting the size of buffer to the length of string to be entered by the user
-
-	printf("\n============  ENTER THE DETAILS TO ADD BUS  ============\n\n");
+	
+	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+	printf("\n                   ============  ENTER THE DETAILS TO ADD BUS  ============\n\n");
+	while(getchar()!='\n')     //clearing input buffer
 	check = 0; //Initializing to check for right value entered by ther user
 	do {
 		printf("Enter bus name:                             ");
@@ -332,6 +334,7 @@ int add_bus(int u_id)
 		{
 			sprintf(departure_time, "%02d:%02d:00", hour, min);   //concatenating the value of hour and min in departure time
 			check = 1; //getting out of loop
+			continue;
 		}
 		while (getchar() != '\n'); // clear input buffer
 		printf("Please enter valid input !!!!!\n");
@@ -346,6 +349,7 @@ int add_bus(int u_id)
 		{
 			sprintf(arrival_time, "%02d:%02d:00", hour, min);   //concatenating the value of hour and min in arrival time
 			check = 1; //getting out of loop
+			continue;
 		}
 		while (getchar() != '\n'); // clear input buffer
 		printf("Please enter valid input !!!!!\n");
@@ -398,10 +402,13 @@ int add_bus(int u_id)
 		//below sql query inserts the route details to route_details table of the database
 		sprintf(query, "insert into route_details (bus_id,from_location,to_location,departure_time,arrival_time,fare) values (%d,'%s','%s','%s','%s',%0.1f)", bus_id, from_location, to_location, departure_time, arrival_time, fare);
 		mysql_query(conn, query); //executing sql query
-		if (mysql_affected_rows(conn) == 1) printf("\n---------  BUS DETAILS HAS BEEN SUCESSFULLY ADDED  ---------\n");
-		else printf("Unable to add bus !!!!!!!!!\n");
+		if (mysql_affected_rows(conn) == 1) {
+			printf("\n                   ---------  BUS DETAILS HAS BEEN SUCESSFULLY ADDED  ---------\n");
+			check_user_response();
+		}
+		else printf("                   Unable to add bus !!!!!!!!!\n");
 	}
-	else printf("Unable to add bus !!!!!!!!!\n");
+	else printf("                   Unable to add bus !!!!!!!!!\n");
 	return 0;
 }
 void check_user_response() {
