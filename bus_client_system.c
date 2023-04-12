@@ -9,6 +9,7 @@ MYSQL_RES *res;
 MYSQL_ROW row;
 
 char* return_today_date();
+void check_user_response();
 int check_existance_in_array(int num, int arr[], int t_array_value);
 int check_existance_in_array(int num, int arr[], int t_array_value) {
 	/* This funcation will check if a number is present in the array or not
@@ -267,18 +268,7 @@ void seat_availability(int u_id) {
 	}
 	else {
 		printf("\n--- SORRY, THERE IS NO BUS FOR THIS LOCATION ---\n");
-		int command;
-		printf("Enter 99 to go back : ");
-		if (scanf("%d", &command) == 1 && command == 99)
-		{
-			printf("\e[1;1H\e[2J");    //this will clear the terminal screen
-		}
-		else {
-			printf("\n                 ----------------------------------------------------------\n");
-			printf("                 -----------    You have entered wrong input    -----------\n");
-			printf("                 -----------------    EXITING PROGRAM    ------------------\n");
-			exit(0);
-		}
+		check_user_response();   //this will ask user if he wants to continue or exit the program
 	}
 }
 
@@ -414,7 +404,21 @@ int add_bus(int u_id)
 	else printf("Unable to add bus !!!!!!!!!\n");
 	return 0;
 }
-
+void check_user_response() {
+	/* this funcation will check if user wants to stayd in program or he/she want to quit */
+	int command;
+	printf("\nEnter 99 to go back : ");
+	if (scanf("%d", &command) == 1 && command == 99)
+	{
+		printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+	}
+	else {
+		printf("\n                 ----------------------------------------------------------\n");
+		printf("                 -----------    You have entered wrong input    -----------\n");
+		printf("                 -----------------    EXITING PROGRAM    ------------------\n");
+		exit(0);
+	}
+}
 void mysql_booking_data_printer(char str[300]) {
 	/* this function will fetch the result from mysql database and prints it beautifully on screen */
 	mysql_query(conn, str);
@@ -427,6 +431,7 @@ void mysql_booking_data_printer(char str[300]) {
 	while (row = mysql_fetch_row(res)) {
 		printf("  %-14s %-17s %-17s %-17s %-14s %-10s\n", row[0], row[1], row[2], row[3], row[4], row[5], row[6]);
 	}
+	check_user_response();  //this will ask user if he wants to continue or exit the program
 }
 void manage_booking(int u_id) {
 	/* this funcation will show the user their complted ,upcoming and canceld ticket */
@@ -436,6 +441,7 @@ void manage_booking(int u_id) {
 	// printf("%s\n",today_date);
 	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
 	while (1) { //starting while loop so to handle if the user has entered unexpected data
+		printf("\e[1;1H\e[2J");    //this will clear the terminal screen
 		printf("==================================================================================================\n");
 		printf("                                          MANAGE ACCOUNT                                          \n");
 		printf("==================================================================================================\n");
@@ -443,10 +449,10 @@ void manage_booking(int u_id) {
 		printf("1. Upcomig Journey\n");
 		printf("2. Completed Journey\n");
 		printf("3. Canceled Journey\n");
-		printf("99. To exit program\n");
+		printf("99. To go back\n");
 		printf("\nEnter your choice: ");
 		// scanf("%d",&choice);
-		if (scanf("%d", &choice) == 1)
+		if (scanf("%d", &choice) == 1 && (choice > 0 && choice < 4 || choice == 99) )
 		{
 			switch (choice) { //started switch cased based on data by user to print mysql info on screen
 			case 1:
@@ -462,6 +468,8 @@ void manage_booking(int u_id) {
 				sprintf(str, "SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.cancel_status=1", u_id);
 				break;
 			case 99:
+				printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+				printf("                     -------------     Got Out Of Manage Account       -------------\n");
 				break;
 			default:
 				printf("Input out of range !!!!\n");  //this will print on screen if user has entered greater than 3 or other than 99
