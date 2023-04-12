@@ -489,60 +489,64 @@ char* return_today_date() {
 }
 
 void cancel_seat(int u_id) {
-	char str[300];
-	int i = 0;
-	char * today_date = return_today_date();
-	int default_size = 1;
-	int cancel_seat_no;
-	char cancel_surity;
+	char str[300];   //stores sql query to execute
+	int i = 0;  //initializing iteration for printing
+	char * today_date = return_today_date(); //stores todays date
+	int default_size = 1;   //defining default size of array to store booking id
+	int cancel_seat_no;   //stores the seat no to cancel
+	char cancel_surity;   //stores data to ensure user actually want to cancel the ticket
 	int* booking_id_array = (int*) malloc(default_size * sizeof(default_size)); // Allocate initial memory for array
-	// printf("%s",today_date);
+	//below sql code gets booking id, bus id, bus name, source location, destination location, seat no , and journey date from the database which is after todays date
 	sprintf(str, "SELECT bk.booking_id,bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date > '%s' and bk.cancel_status=0", u_id, today_date);
-	mysql_query(conn, str);
-	printf("%s\n", str );
+	mysql_query(conn, str);  //execute sql command
 	res = mysql_store_result(conn);   //stores the result of the query
 	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
 	printf("--------------------------------------------------------------------------------------------------\n");
 	printf("Sl No    BUS NUMBER     BUS NAME       SOURCE         DESTINATION       SEAT NUMBER       DATE    \n");
 	printf("--------------------------------------------------------------------------------------------------\n");
-	while (row = mysql_fetch_row(res)) {
-		booking_id_array[i] = atoi(row[0]);
-		// printf("%d\n", booking_id_array[i]);
+	while (row = mysql_fetch_row(res)) {  //this will get each row of data which we get from sql
+		booking_id_array[i] = atoi(row[0]); //storind booking id to the array location
 		booking_id_array = (int*) realloc(booking_id_array, (i + 1) * sizeof(int)); // Reallocate memory with new size
 		printf(" %-7d %-14s %-14s %-14s %-17s %-14s %-10s\n", i + 1, row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
 		i++;
 	}
 
 	while (1) {
-		printf("\nEnter the 'Sl No' to cancel the seat: ");
-		// scanf("%d",&cancel_seat_no);
-		if (scanf("%d", &cancel_seat_no) == 1)
+		printf("\nEnter 99 to go back\n");
+		printf("Enter the 'Sl No' to cancel the seat: ");
+		if (scanf("%d", &cancel_seat_no) == 1)  //checking for right user input
 		{
-			if (cancel_seat_no <= i && cancel_seat_no > 0)
+			if (cancel_seat_no <= i && cancel_seat_no > 0 || cancel_seat_no == 99) //checking for valid input range
 			{
-				printf("\nAre you sure you want to cancel the seat: ");
-				getchar(); // consume newline character
-				scanf("%c", &cancel_surity);
-				printf("%c\n", cancel_surity );
-				if (cancel_surity == 'y')
+				if (cancel_seat_no == 99) //checking if user wants to go back
 				{
-					// printf("%d\n",booking_id_array[cancel_seat_no-1] );
+					printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+					printf("              --------------      Aborted Ticket Cancellation !!!!      --------------\n");
+					break;
+				}
+				printf("\nAre you sure you want to cancel the seat(y/n): ");
+				getchar(); // consume newline character
+				scanf("%c", &cancel_surity);  //this will take input from user than he/she wants is sure to cancel the ticket
+				if (cancel_surity == 'y')  //checkig for surity
+				{
+					//below sql code updates the database by changing the cancel status of the ticket
 					sprintf(str, "update booking_details set cancel_status=1 where booking_id=%d", booking_id_array[cancel_seat_no - 1]);
-					printf("%s\n", str);
-					mysql_query(conn, str);
+					mysql_query(conn, str); //executing sql command
 					printf("---- Ticket Cancelled Successfully !!!! ----\n");
 					break;
 				}
-				else printf("Aborted Ticket Cancellation !!!!\n");
+				else {
+					printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+					printf("              --------------      Aborted Ticket Cancellation !!!!      --------------\n");
+				}
 				break;
 			}
 			else printf("\n---- Enter the correct 'Sl No' !!!!! ----\n");
 		}
 		else {
+			while (getchar() != '\n');        //clearing input buffer
 			printf("Please enter right value !!!!!!\n");
-			break;
 		}
-
 	}
 }
 
