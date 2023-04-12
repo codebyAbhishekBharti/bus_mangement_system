@@ -1108,6 +1108,11 @@ void homepage(int u_id,int permission_level) {
 		printf("            [1.] Book Ticket                                          [2.] Cancel Ticket \n");
 		printf("            [3.] Seat Availabiliy                                     [4.] Manage booking\n");
 		if (permission_level == 1)  printf("            [99.] Exit.\n");
+		else if (permission_level==2)
+		{
+			printf("            [5.] Add Bus                                              [6.] Change Bus Details.      \n");
+			printf("            [99.] Exit.\n\n");
+		}
 		else
 		{
 			printf("            [5.] Add Bus                                              [6.] Change Bus Details.      \n");
@@ -1115,7 +1120,7 @@ void homepage(int u_id,int permission_level) {
 		}
 		int command;
 		printf("\n       Enter Choice: ");
-		if (scanf("%d", &command) == 1 && (((permission_level == 1 && command < 5) || (permission_level != 1 && command < 8)) && command > 0|| command==99) )
+		if (scanf("%d", &command) == 1 && (((permission_level == 1 && command < 5) || (permission_level == 2 && command < 7) || (permission_level == 3 && command < 8)) && command > 0|| command==99) )
 		{
 			switch (command){
 			case 1:
@@ -1192,7 +1197,7 @@ int main(int argc, char const *argv[])
 	int u_id = login_signup_page_control() ;
 	// printf("%d\n",response );
 	int permission_level = check_permission_level(u_id);
-	homepage(u_id,permission_level);
+	homepage(u_id,2);
 	// printf("%d\n",permission_level );
 
 	return 0;
