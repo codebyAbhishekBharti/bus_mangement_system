@@ -68,7 +68,7 @@ int book_ticket(int bus_id, char journey_date[11], int u_id, int route_id, int t
 			printf("----------- Exiting Booking -----------\n");
 			exit(0);
 		}
-		if (seats[0] == NULL)  //checking if user has entered any value or not if user has not entered any value the just restarting the loop
+		if (strlen(seats)==0)  //checks if user has entered anything or not
 		{
 			while (getchar() != '\n'); //clearing input buffer
 			printf("\n!!!!!! Please enter the right seat no. !!!!!!\n\n");
