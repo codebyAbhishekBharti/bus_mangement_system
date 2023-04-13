@@ -65,7 +65,7 @@ int book_ticket(int bus_id, char journey_date[11], int u_id, int route_id, int t
 		scanf("%[^\n]%*c", seats);  //taking string input from the user
 		if (strcmp(seats, "99") == 0)  //checkig if user wants to exit the booking window
 		{
-			printf("----------- Exiting Booking -----------\n");
+			printf("\n                 -----------------    EXITING PROGRAM    ------------------\n");
 			exit(0);
 		}
 		if (strlen(seats) == 0) //checks if user has entered anything or not
@@ -211,7 +211,7 @@ void seat_availability(int u_id) {
 			printf("\nEnter the bus no. you want to check for seat availability: ");
 			// if (scanf("%d", &selected_bus) == 1 && selected_bus < i && selected_bus > 0) //validiates if right bus serial no is selected
 			selected_bus = 1 ;
-			if (selected_bus < i && selected_bus > 0) //validiates if right bus serial no is selected
+			if (selected_bus < i && selected_bus > 0 || selected_bus==1) //validiates if right bus serial no is selected
 			{
 				//below sql command stores sql command to fetch bus name, rating, total seats, departure time, arrival time and fare of the bus
 				sprintf(query, "select bd.bus_name, bd.rating, bd.total_seats, rd.departure_time, rd.arrival_time, rd.fare from bus_details bd join route_details rd on rd.bus_id = bd.bus_id where bd.bus_id=%d", bus_id_array[selected_bus - 1]);
@@ -275,15 +275,15 @@ void seat_availability(int u_id) {
 int add_bus(int u_id)
 {
 	char query[200]; //stores sql query
-	char bus_name[50] = "Dharam Rath", from_location[50] = "Amritsar", to_location[50] = "Jalandhar", departure_time[6] = "08:00", arrival_time[6] = "08:30"; //stores different information to add bus to the db
+	char bus_name[50] = "Dharam Rath", from_location[50] = "Amritsar", to_location[50] = "Jalandhar", departure_time[9] = "08:00", arrival_time[9] = "08:30"; //stores different information to add bus to the db
 	float rating = 5, fare = 40; //stores the rating and fare information
 	int total_seats = 20; //stores total seats
 	int check; //checks for right input entered by the user
 	int buff_size = 50; //setting the size of buffer to the length of string to be entered by the user
 	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
 	printf("\n                   ============  ENTER THE DETAILS TO ADD BUS  ============\n\n");
-	while (getchar() != '\n')  //clearing input buffer
-		check = 0; //Initializing to check for right value entered by ther user
+	while (getchar() != '\n');  //clearing input buffer
+	check = 0; //Initializing to check for right value entered by ther user
 	do {
 		printf("Enter bus name:                             ");
 		fgets(bus_name, buff_size, stdin);   //taking bus name input
@@ -357,7 +357,7 @@ int add_bus(int u_id)
 
 	check = 0; //Initializing to check for right value entered by ther user
 	do {
-		printf("Rating of bus(?/5):                 ");
+		printf("Rating of bus(?/5):                         ");
 		if (scanf("%f", &rating) == 1 && rating > 0 && 5 >= rating) check = 1;  //taking input from the user at the same checking if the value are valid or not
 		else {
 			while (getchar() != '\n'); // clear input buffer
@@ -368,7 +368,7 @@ int add_bus(int u_id)
 
 	check = 0; //Initializing to check for right value entered by ther user
 	do {
-		printf("Fare of bus:                        ");
+		printf("Fare of bus:                                ");
 		if (scanf("%f", &fare) == 1  && fare > 0) check = 1;  //taking input from the user at the same checking if the value are valid or not
 		else {
 			while (getchar() != '\n'); // clear input buffer
@@ -379,7 +379,7 @@ int add_bus(int u_id)
 
 	check = 0; //Initializing to check for right value entered by ther user
 	do {
-		printf("Total seats in bus:                 ");
+		printf("Total seats in bus:                         ");
 		if (scanf("%d", &total_seats) == 1 && total_seats > 0) check = 1;  //taking total seat input from the user and at the same time checking if the value or in range or not
 		else {
 			while (getchar() != '\n'); // clear input buffer
@@ -405,9 +405,9 @@ int add_bus(int u_id)
 			printf("\n                   ---------  BUS DETAILS HAS BEEN SUCESSFULLY ADDED  ---------\n");
 			check_user_response();
 		}
-		else printf("                   Unable to add bus !!!!!!!!!\n");
+		else printf("                      ----------------    UNABLE TO ADD BUS    ----------------\n");
 	}
-	else printf("                   Unable to add bus !!!!!!!!!\n");
+	else printf("                      ----------------    UNABLE TO ADD BUS    ----------------\n");
 	return 0;
 }
 void check_user_response() {
