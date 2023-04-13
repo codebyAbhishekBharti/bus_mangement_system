@@ -125,10 +125,16 @@ int book_ticket(int bus_id, char journey_date[11], int u_id, int route_id, int t
 						printf("!!!!!!!!! Failed to book seats !!!!!!!!!\n");
 						mysql_query(conn, "ROLLBACK"); // if there will be any error and roll back all the transaction
 					}
-					else printf("\n--- Congratulation! Your seats has been booked ---\n");
+					else
+					{
+						printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+						printf("\n            -------------- Congratulation! Your seats has been booked --------------\n");
+					}
 				}
 				else {
-					printf("\n---- Payment Failed !!!! ----\nSorry! Unable to book ticket.... \n");
+					printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+					printf("\n                         -------------- Payment Failed --------------\n");
+					printf("                  --------------  Sorry! Unable to book ticket  --------------\n");
 					int command;
 					printf("Enter 99 to go back : ");
 					if (scanf("%d", &command) == 1 && command == 99)
@@ -211,7 +217,7 @@ void seat_availability(int u_id) {
 			printf("\nEnter the bus no. you want to check for seat availability: ");
 			// if (scanf("%d", &selected_bus) == 1 && selected_bus < i && selected_bus > 0) //validiates if right bus serial no is selected
 			selected_bus = 1 ;
-			if (selected_bus < i && selected_bus > 0 || selected_bus==1) //validiates if right bus serial no is selected
+			if (selected_bus < i && selected_bus > 0 || selected_bus == 1) //validiates if right bus serial no is selected
 			{
 				//below sql command stores sql command to fetch bus name, rating, total seats, departure time, arrival time and fare of the bus
 				sprintf(query, "select bd.bus_name, bd.rating, bd.total_seats, rd.departure_time, rd.arrival_time, rd.fare from bus_details bd join route_details rd on rd.bus_id = bd.bus_id where bd.bus_id=%d", bus_id_array[selected_bus - 1]);
@@ -439,7 +445,7 @@ void mysql_booking_data_printer(char str[300]) {
 	}
 	check_user_response();  //this will ask user if he wants to continue or exit the program
 }
-void manage_booking(int u_id) {
+void manage_account(int u_id) {
 	/* this funcation will show the user their complted ,upcoming and canceld ticket */
 	int choice = 1; //stores the choice of user to display according
 	char str[300];  //stores mysql command to execute
@@ -463,7 +469,7 @@ void manage_booking(int u_id) {
 			switch (choice) { //started switch cased based on data by user to print mysql info on screen
 			case 1:
 				// this will store the sql comand for fetching the data of upcoming journey
-				sprintf(str, "SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date > '%s'", u_id, today_date);
+				sprintf(str, "SELECT bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date >= '%s'", u_id, today_date);
 				break;
 			case 2:
 				// this will store the sql comand for fetching the data of completed journey
@@ -511,7 +517,7 @@ void cancel_seat(int u_id) {
 	char cancel_surity;   //stores data to ensure user actually want to cancel the ticket
 	int* booking_id_array = (int*) malloc(default_size * sizeof(default_size)); // Allocate initial memory for array
 	//below sql code gets booking id, bus id, bus name, source location, destination location, seat no , and journey date from the database which is after todays date
-	sprintf(str, "SELECT bk.booking_id,bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date > '%s' and bk.cancel_status=0", u_id, today_date);
+	sprintf(str, "SELECT bk.booking_id,bd.bus_id, bd.bus_name, rd.from_location, rd.to_location, bk.seat_no, bk.journey_date FROM bus_details bd JOIN route_details rd ON bd.bus_id = rd.bus_id JOIN booking_details bk ON bd.bus_id = bk.bus_id  WHERE bk.u_id=%d and bk.journey_date >= '%s' and bk.cancel_status=0", u_id, today_date);
 	mysql_query(conn, str);  //execute sql command
 	res = mysql_store_result(conn);   //stores the result of the query
 	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
@@ -546,6 +552,11 @@ void cancel_seat(int u_id) {
 					//below sql code updates the database by changing the cancel status of the ticket
 					sprintf(str, "update booking_details set cancel_status=1 where booking_id=%d", booking_id_array[cancel_seat_no - 1]);
 					mysql_query(conn, str); //executing sql command
+					if (mysql_affected_rows(conn) == 1)
+					{
+						printf("               --------------      Ticket Cancelled Successfully      --------------\n");
+						check_user_response();
+					}
 					printf("---- Ticket Cancelled Successfully !!!! ----\n");
 					break;
 				}
@@ -751,7 +762,7 @@ int change_bus_details(int u_id) {
 				printf("--------------------------------------------------------------------------------------------------\n");
 				while (row = mysql_fetch_row(res)) { //iterating through all the row present in the result of mysql
 					id_array[i] = atoi(row[4]); //storing route id of bus in an array
-					id_array = (int*) realloc(id_array, (i + 1) * sizeof(int)); // Reallocate memory with new size
+					id_array = (int*) realloc(id_array, (i + 2) * sizeof(int)); // Reallocate memory with new size
 					printf("%-12d %-16s %-22s %-28s %s\n", i + 1, row[0], row[1], row[2], row[3], row[4]); //printing sql data
 					i++;
 				}
@@ -762,13 +773,13 @@ int change_bus_details(int u_id) {
 					{
 						if (choice == 99) //termination condition
 						{
-							printf("Transaction Canceled fare not changed !!!!!");
+							printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+							printf("                       -------- Transaction Canceled total fare not changed --------\n");
 							break;  //getting out of while loop without changeing fare
 						}
 						while (1) { //starting loop to handle wrong inputs
 							printf("\nEnter the new fare price: ");
-							char buffer[100];
-							if (scanf("%f%s", &fare, &buffer) == 1 && fare > 0)
+							if (scanf("%f", &fare) == 1 && fare > 0)
 							{
 								printf("\n\n Are you sure you want to change the fare(y/n): ");
 								while (getchar() != '\n'); // clear input buffer
@@ -818,7 +829,8 @@ int change_bus_details(int u_id) {
 					{
 						if (choice == 99) //termination condition
 						{
-							printf("Transaction Canceled total seats not changed !!!!!");
+							printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+							printf("                       -------- Transaction Canceled total seats not changed --------\n");
 							break;  //getting out of while loop without changing seats
 						}
 						while (1) { //starting loop to handle wrong inputs
@@ -1066,6 +1078,7 @@ int change_permission(int u_id) {
 	int id = 0; //stoes id of users to change the permission levels
 	char query[100]; //stores mysql command
 	int permission_level = 0;  //stores the permission level to set for the user
+	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
 	while (1) {  //entering the while loop to handle the error
 		printf("\nEnter the user id you want to change the permission level: ");
 		if (scanf("%d", &id) == 1)  //checking for only integer input by the user
@@ -1140,20 +1153,20 @@ int check_permission_level(int u_id) {
 void welcome() {
 	/* this will be displayed when user just opens the application */
 	printf("\e[1;1H\e[2J"); //clearing terminal screen
-	printf("==================================================================================================\n");
-	printf("======                     WELCOME TO ELECTRIC BUS TICKET GENERATOR                         ======\n");
-	printf("==================================================================================================\n");
-	printf("*********************************************************************************\n");
-	printf("**                               **                                            **\n");
-	printf("**  -------------------------    **         ---------------------------------  **\n");
-	printf("**  -  Already a member   -      **         -   Don't have a account yet?   -  **\n");
-	printf("**  - Press 1 for 'Login' -      **         - Press 2 to 'Create a account' -  **\n");
-	printf("**  -------------------------    **           -------------------------------  **\n");
-	printf("**                               **                                            **\n");
-	printf("*********************************************************************************\n");
-	printf("\n\n\n           *****************************\n");
-	printf("           ***  Press 'q' for Exit   ***\n");
-	printf("           *****************************\n");
+	printf("====================================================================================================\n");
+	printf("======                        WELCOME TO ELECTRIC BUS TICKET GENERATOR                        ======\n");
+	printf("====================================================================================================\n");
+	printf("         *********************************************************************************\n");
+	printf("         **                               **                                            **\n");
+	printf("         **  -------------------------    **         ---------------------------------  **\n");
+	printf("         **  -  Already a member   -      **         -   Don't have a account yet?   -  **\n");
+	printf("         **  - Press 1 for 'Login' -      **         - Press 2 to 'Create a account' -  **\n");
+	printf("         **  -------------------------    **           -------------------------------  **\n");
+	printf("         **                               **                                            **\n");
+	printf("         *********************************************************************************\n");
+	printf("\n                          *****************************\n");
+	printf("                          ***  Press 'q' for Exit   ***\n");
+	printf("                          *****************************\n");
 }
 int login_signup_page_control() {
 	while (1) {
@@ -1192,10 +1205,10 @@ int login_signup_page_control() {
 		else if (strcmp(valid3, choice) == 0)       //Comparision for Quit statement
 		{
 			printf("\e[1;1H\e[2J");
-			printf("                    ****************************\n");
-			printf("                    ****      Visit Again    ***\n");
-			printf("                    ****       Take Care     ***\n");
-			printf("                    ****************************\n");
+			printf("                              ****************************\n");
+			printf("                              ****      Visit Again    ***\n");
+			printf("                              ****       Take Care     ***\n");
+			printf("                              ****************************\n");
 			exit(0);
 		}
 		else                                      // If other than 1 or 2 or Q pressed
@@ -1239,7 +1252,7 @@ void homepage(int u_id, int permission_level) {
 				seat_availability(u_id);
 				break;
 			case 4:
-				manage_booking(u_id);
+				manage_account(u_id);
 				break;
 			case 5:
 				add_bus(u_id);
@@ -1251,7 +1264,10 @@ void homepage(int u_id, int permission_level) {
 				change_permission(u_id);
 				break;
 			case 99:
-				printf("\n    --------- Exiting Program --------------\n");
+				printf("                                   ****************************\n");
+				printf("                                   ****      Visit Again    ***\n");
+				printf("                                   ****       Take Care     ***\n");
+				printf("                                   ****************************\n");
 				exit(0);
 			}
 			// break;
@@ -1283,7 +1299,7 @@ int main(int argc, char const *argv[])
 	}
 	// printf("\e[1;1H\e[2J");    //this will clear the terminal screen
 
-	int u_id = login("Abhishek", "abhishek");  //sending userid or password to login function to get user id if successful login or 0
+	// int u_id = login("Abhishek", "abhishek");  //sending userid or password to login function to get user id if successful login or 0
 	// printf("%d\n", uid_status);
 	// signup(); //started signup module if the user wants to register into the software
 
@@ -1291,7 +1307,7 @@ int main(int argc, char const *argv[])
 
 	// add_bus(uid_status);
 
-	// manage_booking(uid_status);
+	// manage_account(uid_status);
 
 	// cancel_seat(uid_status);
 
@@ -1299,8 +1315,8 @@ int main(int argc, char const *argv[])
 
 	// change_permission(uid_status);
 
-	// welcome();
-	// int u_id = login_signup_page_control() ;
+	welcome();
+	int u_id = login_signup_page_control() ;
 	// // printf("%d\n",response );
 	int permission_level = check_permission_level(u_id);
 	homepage(u_id, permission_level);
