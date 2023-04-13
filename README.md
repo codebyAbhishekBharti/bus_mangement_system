@@ -151,8 +151,12 @@ Module Output:- Output show as below:
 
    Adminstrator or Bus owner: along with module of normal user, add bus, modify bus and permission level.
 
-
 ![add bus iamge](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-13%2019_14_44.png?raw=true)
+
+## ER Diagram of Database
+
+![add bus iamge](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/ER_diagram_bus_management_system.png?raw=true)
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first
