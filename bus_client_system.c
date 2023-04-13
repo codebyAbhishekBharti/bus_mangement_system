@@ -1231,17 +1231,17 @@ void homepage(int u_id, int permission_level) {
 		printf("==================================================================================================\n");
 		printf("\n\n\n");
 		printf("            [1.] Book Ticket                                          [2.] Cancel Ticket \n");
-		printf("            [3.] Seat Availabiliy                                     [4.] Manage booking\n");
+		printf("            [3.] Seat Availabiliy                                     [4.] Manage account\n");
 		if (permission_level == 1)  printf("            [99.] Exit.\n");
 		else if (permission_level == 2)
 		{
-			printf("            [5.] Add Bus                                              [6.] Change Bus Details.      \n");
+			printf("            [5.] Add Bus                                              [6.] Change Bus Details      \n");
 			printf("            [99.] Exit.\n\n");
 		}
 		else
 		{
 			printf("            [5.] Add Bus                                              [6.] Change Bus Details.      \n");
-			printf("            [7.] Change permission level.                             [99.] Exit.\n\n");
+			printf("            [7.] Change permission level                             [99.] Exit.\n\n");
 		}
 		int command;
 		printf("\n       Enter Choice: ");
