@@ -618,6 +618,9 @@ int signup() {
 	int check; //stoes value to check if right value is entered
 	int buff_size = 50; //default buffer length for fixing the length to be entered by the user
 
+	printf("--------------------------------------------------------------------------------------------------\n");
+	printf("                                              SIGNUP                                                ");
+	printf("--------------------------------------------------------------------------------------------------\n\n");
 	check = 0; //Initializing to check for right value entered by ther user
 	do {
 		printf("Enter your name:                    ");
@@ -717,8 +720,8 @@ int signup() {
 	sprintf(str, "insert into users (name,user_name,age,email,mob,password) values ('%s','%s',%d,'%s',%d,'%s')", name, user_name, age, email, mob, password); //storing sql command to create new user
 	// printf("%s\n", str);
 	mysql_query(conn, str); //executes mysql query
-	printf("\e[1;1H\e[2J"); //clearing the terminal screen
 	printf("\n\n                      ----- Account has been Successfully created !!!!! -----\n");
+	check_user_response();
 	return 0;
 }
 
@@ -1180,6 +1183,9 @@ int login_signup_page_control() {
 		if (strcmp(valid1, choice) == 0 )           //Comparision for Login
 		{
 			printf("\e[1;1H\e[2J");
+			printf("--------------------------------------------------------------------------------------------------\n");
+			printf("                                               LOGIN                                                ");
+			printf("--------------------------------------------------------------------------------------------------\n\n");
 			char u_id[50], password[50];
 			printf("Enter your user id: ");
 			scanf("%s", &u_id);
