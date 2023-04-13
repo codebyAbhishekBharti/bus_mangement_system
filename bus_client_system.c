@@ -280,7 +280,6 @@ int add_bus(int u_id)
 	int total_seats = 20; //stores total seats
 	int check; //checks for right input entered by the user
 	int buff_size = 50; //setting the size of buffer to the length of string to be entered by the user
-
 	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
 	printf("\n                   ============  ENTER THE DETAILS TO ADD BUS  ============\n\n");
 	while (getchar() != '\n')  //clearing input buffer
@@ -856,7 +855,7 @@ int change_bus_details(int u_id) {
 				break;
 			case 3:
 				printf("\e[1;1H\e[2J");    //this will clear the terminal screen
-				printf("                  -------------     CHANGE ARRIVAL/DEPARTURE TIME       -------------\n");				
+				printf("                  -------------     CHANGE ARRIVAL/DEPARTURE TIME       -------------\n");
 				char **depart_time_array = malloc(default_size * sizeof(char *));   // Allocate initial memory for array to store departure time of bus
 				char **arrival_time_array = malloc(default_size * sizeof(char *));  // Allocate initial memory for array to store arrival time of bus
 				//below is sql command which fetch route id, bus name, source location, destination location, departure time, arrival time of the bus to modify the time deatils if required
@@ -878,7 +877,7 @@ int change_bus_details(int u_id) {
 				}
 				while (1) { //starting loop for handling wrong inputs
 					printf("\nEnter the Serial Number of bus whose arrival/departure time you want to change: ");
-					if (scanf("%d", &choice) == 1 && (choice <= i && choice>0 || choice == 99)) //condition to check for valid input
+					if (scanf("%d", &choice) == 1 && (choice <= i && choice > 0 || choice == 99)) //condition to check for valid input
 					{
 						if (choice == 99) //termination condition
 						{
@@ -918,7 +917,7 @@ int change_bus_details(int u_id) {
 				break;
 			case 4:
 				printf("\e[1;1H\e[2J");    //this will clear the terminal screen
-				printf("                -------------     CHANGE ARRIVAL/DEPARTURE LOCATION       -------------\n");				
+				printf("                -------------     CHANGE ARRIVAL/DEPARTURE LOCATION       -------------\n");
 				char **source_location_array = malloc(default_size * sizeof(char *));   // Allocate initial memory for array to store departure time of bus
 				char **destination_location_array = malloc(default_size * sizeof(char *));  // Allocate initial memory for array to store arrival time of bus
 				//below is sql command which fetch route id, bus name, source location, destination location, departure time, arrival time of the bus to modify the time deatils if required
@@ -1055,30 +1054,44 @@ int change_permission(int u_id) {
 			row = mysql_fetch_row(res); //getting the first row of sql
 			if (atoi(row[0]) == 1) //checking if there is user or not with the user id given in input
 			{
+				sprintf(query, "select permission from users where u_id=%d", id);
+				mysql_query(conn, query);
+				res = mysql_store_result(conn);
+				row = mysql_fetch_row(res);
+				printf("\n       Your Current permssion level is %d\n", atoi(row[0]));
+				printf("--------------------------------------------------------------------------------------------------\n");
+				printf("       Enter the permssion level for the user:- \n");
+				printf("       Level 1 : Normal User\n");
+				printf("       Level 2 : Bus Owner\n");
+				printf("       Level 3 : Administrator\n");
+				printf("       Enter 99 to exit\n");
+				printf("--------------------------------------------------------------------------------------------------\n");
 				while (1) { //starting loop to handle errors
-					printf("Enter the permssion level for the user:- \n");
-					printf("Level 1 : Normal User\n");
-					printf("Level 2 : Bus Owner\n");
-					printf("Level 3 : Administrator\n");
-					printf("Enter 99 to exit\n");
-					printf("Enter the permission level in numeric value: ");
+					printf("Enter the permission level: ");
 					if (scanf("%d", &permission_level) == 1 && permission_level > 0 && (permission_level < 4 || permission_level == 99)) //checking conditions to verify if the users has given the right permssion level to enter
 					{
 						if (permission_level == 99)  //if user enters 99 get out of permssion change module
 						{
-							printf("Aborted permission change\n");
+							printf("\e[1;1H\e[2J");
+							printf("                       ----------    Aborted permission change   ----------\n");
 							break;
 						}
 						//below sql command updates the persmssion of the u_id given by the user
 						sprintf(query, "update users set permission=%d where u_id=%d", permission_level, id);
 						mysql_query(conn, query); //executing sql command
 						int check = mysql_affected_rows(conn); //getting total affected row in the db to check if the effect was successful or not
-						if (check == 1) printf("Permission changed successfully !!!!!!!!!\n"); //checking for successfull effect
-						else printf("Failed to change permission !!!!!!!!\n"); //printing if changes get failed
+						if (check == 1) {
+							printf("                    ----------    Permission changed successfully   ----------\n"); //checking for successfull effect
+							check_user_response();
+						}
+						else {
+							printf("\e[1;1H\e[2J");
+							printf("                       ----------    Failed to change permission   ----------\n"); //printing if changes get failed
+						}
 						break;
 					}
 					while (getchar() != '\n'); // clear input buffer
-					printf("\nPlease enter valid input !!!!!");
+					printf("\nPlease enter valid input !!!!!\n");
 				}
 				break;
 			}
@@ -1088,7 +1101,7 @@ int change_permission(int u_id) {
 			}
 		}
 		while (getchar() != '\n'); // clear input buffer
-		printf("\nPlease enter valid input !!!!!");
+		printf("\nPlease enter valid input !!!!!\n");
 	}
 }
 int check_permission_level(int u_id) {
