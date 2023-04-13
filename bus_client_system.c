@@ -992,7 +992,7 @@ int change_bus_details(int u_id) {
 				}
 				while (1) {
 					printf("\nEnter the Sl. No. of bus which you want to delete: ");
-					if (scanf("%d", &choice) == 1 && (choice <= i || choice == 99)) //condition to check for valid input
+					if (scanf("%d", &choice) == 1 && (choice <= i && choice > 0 || choice == 99)) //condition to check for valid input
 					{
 
 						if (choice == 99) //termination condition
@@ -1012,9 +1012,13 @@ int change_bus_details(int u_id) {
 							//below sql code will delete all the route detials of the bus that user want to delete
 							sprintf(query, "delete from route_details where bus_id=%d", bus_id);
 							mysql_query(conn, query); //executing sql command
-							printf("\n--------  Bus details has been successfully deleted --------\n\n");
+							printf("\n              --------  Bus details has been successfully deleted --------\n\n");
+							check_user_response();
 						}
-						else printf("Transaction Canceled bus not deleted!!!!!\n");
+						else {
+							printf("\e[1;1H\e[2J");
+							printf("                ----------   Transaction Canceled bus not deleted  ----------\n");
+						}
 						break;
 					}
 					while (getchar() != '\n'); // clear input buffer
