@@ -27,6 +27,11 @@ gcc -o bus_client_system bus_client_system.c `mysql_config --cflags --libs`
 ```bash
 ./bus_client_system
 ```
+## Welcome Page
+![iamge of welcome page](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-13%2018_41_34.png?raw=true)
+
+## HOme Page
+![iamge of welcome page](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-13%2018_41_47.png?raw=truee)
 
 ## Module Description
 
@@ -39,6 +44,7 @@ Module Dependencies: - Database for matching userid and password.
 Module Input:- User id and password. 
 
 Module Output :-Login to page if input data is correct else return invalid input.
+
 
 ### 2. Signup module
 
@@ -60,6 +66,7 @@ Module Input:-Date journey,Source and Destination location
 
 Module Output:-Display available seats for enterd location.
 
+![iamge of seat available](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-13%2018_42_19.png?raw=true)
 
 ### 4. Book Ticket
 
@@ -81,6 +88,9 @@ Module Input:-User select the input for cancel the ticket.
 
 Module Output:- Pop-up showing ticket canceled.
 
+
+![iamge of seat available](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-13%2018_56_44.png?raw=true)
+
 ### 6. Manage account
 
 Module Purpose:-To let user know their completed journey, upcoming journey and cancel journey i.e user can see the details of journey he did and give the feedback of the journey.
@@ -90,6 +100,9 @@ Module Dependencies:-Database to fetch detail and Cancel ticket module.
 Module Input:-User to see their journey and cancel the ticket.
 
 Module Output:-User will see their journey and and cancel ticket.
+
+
+![manage account iamge](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-13%2018_58_16.png?raw=true)
 
 ### 7. Add Bus
 
@@ -101,6 +114,9 @@ Module Input:-Bus name, source location, destination location,arriving time, dep
 
 Module Output:-Show that a new bus has been added.
 
+
+![add bus iamge](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-13%2019_00_12.png?raw=true)
+
 ### 8. Change bus details
 
 Module Purpose:-To modify the bus details for the journey i.e. bus owner o adminstrator can change the arival departure , fair charge etc of existing bus.
@@ -110,6 +126,8 @@ Module Dependencies:-Database to update the details of the bus.
 Module Input:-Change bus name,bus seat, source and setination location,delete bus.
 
 Module Output:-Show the changes done.
+
+![add bus iamge](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-13%2019_00_23.png?raw=true)
 
 ### 9. Change Permission Level
 
@@ -128,6 +146,7 @@ Module Output:- Output show as below:
    Adminstrator or Bus owner: along with module of normal user, add bus, modify bus and permission level.
 
 
+![add bus iamge](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-13%2019_14_44.png?raw=true)
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first
