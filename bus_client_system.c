@@ -280,11 +280,11 @@ int add_bus(int u_id)
 	int total_seats = 20; //stores total seats
 	int check; //checks for right input entered by the user
 	int buff_size = 50; //setting the size of buffer to the length of string to be entered by the user
-	
+
 	printf("\e[1;1H\e[2J");    //this will clear the terminal screen
 	printf("\n                   ============  ENTER THE DETAILS TO ADD BUS  ============\n\n");
-	while(getchar()!='\n')     //clearing input buffer
-	check = 0; //Initializing to check for right value entered by ther user
+	while (getchar() != '\n')  //clearing input buffer
+		check = 0; //Initializing to check for right value entered by ther user
 	do {
 		printf("Enter bus name:                             ");
 		fgets(bus_name, buff_size, stdin);   //taking bus name input
@@ -728,14 +728,14 @@ int change_bus_details(int u_id) {
 	printf("==================================================================================================\n");
 	printf("                                         CHANGE BUS DETAILS                                       \n");
 	printf("==================================================================================================\n");
+	printf("\nSelect the option to change details: \n");
+	printf("1. Change bus fare\n");
+	printf("2. Change total bus seats\n");
+	printf("3. Change arrival/departure time\n");
+	printf("4. Change source/destination location\n");
+	printf("5. Delete bus\n");
+	printf("99. Go back\n");
 	while (1) {
-		printf("\nSelect the option to change details: \n");
-		printf("1. Change bus fare\n");
-		printf("2. Change total bus seats\n");
-		printf("3. Change arrival/departure location\n");
-		printf("4. Change source/destination location\n");
-		printf("5. Delete bus\n");
-		printf("99. Go back\n");
 		printf("Enter your choice here: ");
 		if (scanf("%d", &choice) == 1)
 		{
@@ -743,9 +743,10 @@ int change_bus_details(int u_id) {
 			case 1:
 				//below line stores the sql command to fetch bus name, from location, to location and fare of bus where bus owner is user
 				sprintf(query, "select bd.bus_name,rd.from_location,rd.to_location,rd.fare,rd.route_id from bus_details bd join route_details rd on bd.bus_id = rd.bus_id where bd.owner_id=%d", u_id);
-				printf("%s\n", query);
 				mysql_query(conn, query); //running sql query
 				res = mysql_store_result(conn); //storing sql result
+				printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+				printf("                        -------------     CHANGE BUS FARE       -------------\n");
 				printf("--------------------------------------------------------------------------------------------------\n");
 				printf("Sl. No.      Bus Name         Source Location        Destination Location         Fare            \n");
 				printf("--------------------------------------------------------------------------------------------------\n");
@@ -758,7 +759,7 @@ int change_bus_details(int u_id) {
 
 				while (1) { //starting loop for handling wrong inputs
 					printf("\nEnter the Serial Number of bus whose fare charge you want to change: ");
-					if (scanf("%d", &choice) == 1 && (choice <= i || choice == 99)) //condition to check for valid input
+					if (scanf("%d", &choice) == 1 && (choice <= i && choice > 0 || choice == 99)) //condition to check for valid input
 					{
 						if (choice == 99) //termination condition
 						{
@@ -767,7 +768,8 @@ int change_bus_details(int u_id) {
 						}
 						while (1) { //starting loop to handle wrong inputs
 							printf("\nEnter the new fare price: ");
-							if (scanf("%f", &fare) == 1)
+							char buffer[100];
+							if (scanf("%f%s", &fare, &buffer) == 1 && fare > 0)
 							{
 								printf("\n\n Are you sure you want to change the fare(y/n): ");
 								while (getchar() != '\n'); // clear input buffer
@@ -776,9 +778,13 @@ int change_bus_details(int u_id) {
 								{
 									sprintf(query, "update route_details set fare=%0.2f where route_id=%d", fare, id_array[choice - 1]);
 									mysql_query(conn, query);
-									printf("\n--------  Fare has been successfully changed --------\n\n");
+									printf("\n                        --------  Fare has been successfully changed --------\n\n");
+									check_user_response();
 								}
-								else printf("Transaction Canceled fare not changed !!!!!");
+								else {
+									printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+									printf("\n                      --------  Transaction Canceled fare not changed --------\n");
+								}
 								break;
 							}
 							while (getchar() != '\n'); // clear input buffer
@@ -793,6 +799,8 @@ int change_bus_details(int u_id) {
 				}
 				break;
 			case 2:
+				printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+				printf("                        -------------     CHANGE TOTAL SEATS       -------------\n");
 				sprintf(query, "select bus_id,bus_name,total_seats from bus_details where owner_id=%d", u_id); //storing mysql query to fetch bus id, bus name and total bus which is owned by that user
 				mysql_query(conn, query); //executing sql query
 				res = mysql_store_result(conn); //stroing the result of mysql
@@ -807,7 +815,7 @@ int change_bus_details(int u_id) {
 				}
 				while (1) { //starting loop for handling wrong inputs
 					printf("\nEnter the Serial Number of bus whose total seats you want to change: ");
-					if (scanf("%d", &choice) == 1 && (choice <= i || choice == 99)) //condition to check for valid input
+					if (scanf("%d", &choice) == 1 && (choice <= i && choice > 0 || choice == 99)) //condition to check for valid input
 					{
 						if (choice == 99) //termination condition
 						{
@@ -826,9 +834,13 @@ int change_bus_details(int u_id) {
 									//below line stores the sql query to change the total seats provided as by bus owner
 									sprintf(query, "update bus_details set total_seats=%d where bus_id=%d", seats, id_array[choice - 1]);
 									mysql_query(conn, query); //executing sql command
-									printf("\n--------  Total seats has been successfully changed --------\n\n");
+									printf("\n                      --------  Total seats has been successfully changed --------\n\n");
+									check_user_response();
 								}
-								else printf("Transaction Canceled fare not changed !!!!!");
+								else {
+									printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+									printf("                    -------------  Transaction Canceled fare not changed   -------------\n");
+								}
 								break;
 							}
 							while (getchar() != '\n'); // clear input buffer
@@ -843,6 +855,8 @@ int change_bus_details(int u_id) {
 				}
 				break;
 			case 3:
+				printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+				printf("                  -------------     CHANGE ARRIVAL/DEPARTURE TIME       -------------\n");				
 				char **depart_time_array = malloc(default_size * sizeof(char *));   // Allocate initial memory for array to store departure time of bus
 				char **arrival_time_array = malloc(default_size * sizeof(char *));  // Allocate initial memory for array to store arrival time of bus
 				//below is sql command which fetch route id, bus name, source location, destination location, departure time, arrival time of the bus to modify the time deatils if required
@@ -857,14 +871,14 @@ int change_bus_details(int u_id) {
 					depart_time_array[i] = row[4]; //storing the departure time of bus
 					arrival_time_array[i] = row[5]; //storing the arrival tiem of bus
 					id_array = (int*) realloc(id_array, (i + 1) * sizeof(int)); // Reallocate memory with new size
-					depart_time_array = realloc(depart_time_array, (i + 1) * sizeof(char *)); //rellocate memory with new size
-					arrival_time_array = realloc(arrival_time_array, (i + 1) * sizeof(char *)); //reallocate memory with new size
+					depart_time_array = realloc(depart_time_array, (i + 2) * sizeof(char *)); //rellocate memory with new size
+					arrival_time_array = realloc(arrival_time_array, (i + 2) * sizeof(char *)); //reallocate memory with new size
 					printf(" %-6d %-16s %-20s %-23s %-18s %s \n", i + 1, row[1], row[2], row[3], row[4], row[5] ); //printing details
 					i++;  //increasing the value for next iteration
 				}
 				while (1) { //starting loop for handling wrong inputs
 					printf("\nEnter the Serial Number of bus whose arrival/departure time you want to change: ");
-					if (scanf("%d", &choice) == 1 && (choice <= i || choice == 99)) //condition to check for valid input
+					if (scanf("%d", &choice) == 1 && (choice <= i && choice>0 || choice == 99)) //condition to check for valid input
 					{
 						if (choice == 99) //termination condition
 						{
@@ -903,6 +917,8 @@ int change_bus_details(int u_id) {
 				}
 				break;
 			case 4:
+				printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+				printf("                -------------     CHANGE ARRIVAL/DEPARTURE LOCATION       -------------\n");				
 				char **source_location_array = malloc(default_size * sizeof(char *));   // Allocate initial memory for array to store departure time of bus
 				char **destination_location_array = malloc(default_size * sizeof(char *));  // Allocate initial memory for array to store arrival time of bus
 				//below is sql command which fetch route id, bus name, source location, destination location, departure time, arrival time of the bus to modify the time deatils if required
@@ -917,8 +933,8 @@ int change_bus_details(int u_id) {
 					source_location_array[i] = row[2]; //storing the source location of bus in array
 					destination_location_array[i] = row[3]; //storing the destination location of bus in array
 					id_array = (int*) realloc(id_array, (i + 1) * sizeof(int)); // Reallocate memory with new size
-					source_location_array = realloc(source_location_array, (i + 1) * sizeof(char *)); //rellocate memory with new size
-					destination_location_array = realloc(destination_location_array, (i + 1) * sizeof(char *)); //reallocate memory with new size
+					source_location_array = realloc(source_location_array, (i + 2) * sizeof(char *)); //rellocate memory with new size
+					destination_location_array = realloc(destination_location_array, (i + 2) * sizeof(char *)); //reallocate memory with new size
 					printf(" %-6d %-16s %-20s %-23s %-18s %s \n", i + 1, row[1], row[2], row[3], row[4], row[5] ); //printing details
 					i++;  //increasing the value for next iteration
 				}
@@ -1008,16 +1024,17 @@ int change_bus_details(int u_id) {
 				}
 				break;
 			case 99:
-				printf("Going back\n");
+				printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+				printf("              -------------     Got Out Of Change Bus Details       -------------\n");
 				break;
 			default:
-				printf("Please enter valid details !!!!!");
+				printf("\nPlease enter valid details !!!!!\n");
 				continue;
 			}
 			break;
 		}
 		while (getchar() != '\n'); // clear input buffer
-		printf("\nPlease enter valid details!!!!!");
+		printf("\nPlease enter valid details!!!!!\n");
 		continue;
 	}
 	return 0;
