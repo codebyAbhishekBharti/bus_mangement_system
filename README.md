@@ -69,7 +69,7 @@ Module Input:-Date journey,Source and Destination location
 
 Module Output:-Display available seats for enterd location.
 
-![iamge of seat available](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-13%2018_42_19.png?raw=true)
+![iamge of seat available](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-14%2001_10_38.png?raw=true)
 
 ### 4. Book Ticket
 
@@ -80,6 +80,8 @@ Module Dependencies:-Database to book selected seat.
 Module Input:- enter desired seat to book.
 
 Module Output:-After booking, pop-up showing that seat booked.
+
+![iamge of welcome page](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-14%2001_11_39.png?raw=true)
 
 ### 5. Cancel Ticket
 
