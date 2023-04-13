@@ -30,7 +30,7 @@ gcc -o bus_client_system bus_client_system.c `mysql_config --cflags --libs`
 ## Welcome Page
 ![iamge of welcome page](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-13%2018_41_34.png?raw=true)
 
-## HOme Page
+## Home Page
 ![iamge of welcome page](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-13%2018_41_47.png?raw=truee)
 
 ## Module Description
@@ -45,6 +45,7 @@ Module Input:- User id and password.
 
 Module Output :-Login to page if input data is correct else return invalid input.
 
+![iamge of welcome page](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-14%2000_50_49.png?raw=true)
 
 ### 2. Signup module
 
@@ -55,6 +56,8 @@ Module Dependencies: Database for storing the data of new user and login module.
 Module Input:- User name, User id, password, Age, Mobile no., Address.
 
 Module Output:-Redirect to login page after creating account to make them login.
+
+![iamge of welcome page](https://github.com/codebyAbhishekBharti/bus_mangement_system/blob/main/sample_images/Screenshot%202023-04-14%2000_55_58.png?raw=true)
 
 ### 3. Seat availability
 
@@ -137,6 +140,7 @@ Module Purpose:-To chage permission level so that a limited features will be pro
        Level 2 : Bus Owner
        Level 3 : Administrator
 Module Dependencies:-Depend on database for changing the level of user i.e Normal user , Bus owner and Adminstator.
+
 Module Input:-User id by user to ectract level of user.
 
 Module Output:- Output show as below:
