@@ -68,7 +68,7 @@ int book_ticket(int bus_id, char journey_date[11], int u_id, int route_id, int t
 			printf("----------- Exiting Booking -----------\n");
 			exit(0);
 		}
-		if (strlen(seats)==0)  //checks if user has entered anything or not
+		if (strlen(seats) == 0) //checks if user has entered anything or not
 		{
 			while (getchar() != '\n'); //clearing input buffer
 			printf("\n!!!!!! Please enter the right seat no. !!!!!!\n\n");
@@ -869,19 +869,21 @@ int change_bus_details(int u_id) {
 					id_array[i] = atoi(row[0]); //storing the bus_id for change the arrival/departure details of that bus
 					depart_time_array[i] = row[4]; //storing the departure time of bus
 					arrival_time_array[i] = row[5]; //storing the arrival tiem of bus
-					id_array = (int*) realloc(id_array, (i + 1) * sizeof(int)); // Reallocate memory with new size
+					id_array = (int*) realloc(id_array, (i + 2) * sizeof(int)); // Reallocate memory with new size
 					depart_time_array = realloc(depart_time_array, (i + 2) * sizeof(char *)); //rellocate memory with new size
 					arrival_time_array = realloc(arrival_time_array, (i + 2) * sizeof(char *)); //reallocate memory with new size
 					printf(" %-6d %-16s %-20s %-23s %-18s %s \n", i + 1, row[1], row[2], row[3], row[4], row[5] ); //printing details
 					i++;  //increasing the value for next iteration
 				}
 				while (1) { //starting loop for handling wrong inputs
-					printf("\nEnter the Serial Number of bus whose arrival/departure time you want to change: ");
+					printf("\nEnter 99 to go back\n");
+					printf("Enter the Serial Number of bus: ");
 					if (scanf("%d", &choice) == 1 && (choice <= i && choice > 0 || choice == 99)) //condition to check for valid input
 					{
 						if (choice == 99) //termination condition
 						{
-							printf("Transaction Canceled arrival/departure time not changed !!!!!");
+							printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+							printf("          -------------  Transaction Canceled arrival/departure time not changed  -------------\n");
 							break;  //getting out of while loop without changing arrival/departure time
 						}
 						while (getchar() != '\n'); // clear input buffer
@@ -906,8 +908,16 @@ int change_bus_details(int u_id) {
 						// printf("%s\n",query );
 						mysql_query(conn, query); //executing sql command
 						int check_consistency = mysql_affected_rows(conn);  //checking if query ran successfully or not this funcation will return -1 if error in command , 0 if there is no row affected else total now affected
-						if (check_consistency >= 1) printf("\n--------  Departure/Arrival time has been successfully changed --------\n\n"); //printing this details if any row is getting updated
-						else printf("\n--------  Transaction Canceled arrival/departure time not changed !!!!! --------\n\n");  //printing if there is not change in database
+						if (check_consistency >= 1)
+						{
+							printf("\n              --------  Departure/Arrival time has been successfully changed --------\n\n"); //printing this details if any row is getting updated
+							check_user_response();
+						}
+						else
+						{
+							printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+							printf("\n            --------  Transaction Canceled arrival/departure time not changed  --------\n\n");  //printing if there is not change in database
+						}
 						break;  //getting out of switch case
 					}
 					while (getchar() != '\n'); // clear input buffer
@@ -931,15 +941,15 @@ int change_bus_details(int u_id) {
 					id_array[i] = atoi(row[0]); //storing the bus_id for change the arrival/departure details of that bus
 					source_location_array[i] = row[2]; //storing the source location of bus in array
 					destination_location_array[i] = row[3]; //storing the destination location of bus in array
-					id_array = (int*) realloc(id_array, (i + 1) * sizeof(int)); // Reallocate memory with new size
+					id_array = (int*) realloc(id_array, (i + 2) * sizeof(int)); // Reallocate memory with new size
 					source_location_array = realloc(source_location_array, (i + 2) * sizeof(char *)); //rellocate memory with new size
 					destination_location_array = realloc(destination_location_array, (i + 2) * sizeof(char *)); //reallocate memory with new size
 					printf(" %-6d %-16s %-20s %-23s %-18s %s \n", i + 1, row[1], row[2], row[3], row[4], row[5] ); //printing details
 					i++;  //increasing the value for next iteration
 				}
 				while (1) { //starting loop for handling wrong inputs
-					printf("\nEnter the Serial Number of bus whose source/destination date you want to change: ");
-					if (scanf("%d", &choice) == 1 && (choice <= i || choice == 99)) //condition to check for valid input
+					printf("\nEnter the Serial Number of bus: ");
+					if (scanf("%d", &choice) == 1 && (choice <= i && choice > 0 || choice == 99)) //condition to check for valid input
 					{
 						if (choice == 99) //termination condition
 						{
@@ -947,15 +957,16 @@ int change_bus_details(int u_id) {
 							break;  //getting out of while loop without changing arrival/departure time
 						}
 						while (getchar() != '\n'); // clear input buffer
-						printf("\nEnter new source location time (hit enter to skip): ");
+						printf("\nEnter new source location(hit enter to skip): ");
 						gets(from_location);
+						// fgets(from_location, 50, stdin);   //taking email input
 						if (from_location[0] == '\0') {
 							/*copying the data of the array to a variable
 							 where strcspn is fetching the first new line character in the data and getting with index
 							 strncpy is copying the data to new varibale */
 							strncpy(from_location, source_location_array[choice - 1], strcspn(source_location_array[choice - 1], "\n") + 1);
 						}
-						printf("\nEnter new departure location time (hit enter to skip): ");
+						printf("\nEnter new departure location(hit enter to skip): ");
 						gets(to_location);
 						if (to_location[0] == '\0') {
 							// copying the data from the array and storing the data pointer to a variable
@@ -966,8 +977,16 @@ int change_bus_details(int u_id) {
 						// printf("%s\n",query );
 						mysql_query(conn, query); //executing sql command
 						int check_consistency = mysql_affected_rows(conn);  //checking if query ran successfully or not this funcation will return -1 if error in command , 0 if there is no row affected else total now affected
-						if (check_consistency >= 1) printf("\n--------  Source/Destination location has been successfully changed --------\n\n"); //printing this details if any row is getting updated
-						else printf("\n--------  Transaction Canceled Source/Destination location not changed !!!!! --------\n\n");  //printing if there is not change in database
+						if (0 >= 1)
+						{
+							printf("\n          --------  Source/Destination location has been successfully changed --------\n\n"); //printing this details if any row is getting updated
+							check_user_response();
+						}
+						else
+						{
+							printf("\e[1;1H\e[2J");    //this will clear the terminal screen
+							printf("\n       --------  Transaction Canceled Source/Destination location not changed !!!!! --------\n\n");  //printing if there is not change in database
+						}
 						break;  //getting out of switch case
 					}
 					while (getchar() != '\n'); // clear input buffer
@@ -1276,7 +1295,7 @@ int main(int argc, char const *argv[])
 
 	// cancel_seat(uid_status);
 
-	// change_bus_details(uid_status);
+	// change_bus_details(u_id);
 
 	// change_permission(uid_status);
 
